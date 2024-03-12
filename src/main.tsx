@@ -1,15 +1,15 @@
-import '@rainbow-me/rainbowkit/styles.css'
-import { BrowserRouter } from 'react-router-dom'
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import { RainbowKitProvider } from '@rainbow-me/rainbowkit'
-import { ThemeProvider } from 'styled-components'
 import { ThorinGlobalStyles, lightTheme } from '@ensdomains/thorin'
-import { WagmiProvider } from 'wagmi'
+import { RainbowKitProvider } from '@rainbow-me/rainbowkit'
+import '@rainbow-me/rainbowkit/styles.css'
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import React from 'react'
 import ReactDOM from 'react-dom/client'
+import { BrowserRouter } from 'react-router-dom'
+import { ThemeProvider } from 'styled-components'
+import { WagmiProvider } from 'wagmi'
 
-import { wagmiConfig } from './lib/web3.ts'
 import App from './App.tsx'
+import { wagmiConfig } from './lib/web3.ts'
 
 const queryClient = new QueryClient()
 

@@ -1,8 +1,8 @@
-import { Link } from 'react-router-dom'
 import { Profile } from '@ensdomains/thorin'
+import { useConnectModal } from '@rainbow-me/rainbowkit'
+import { Link } from 'react-router-dom'
 import { useAccount } from 'wagmi'
 
-import { useConnectModal } from '@rainbow-me/rainbowkit'
 import logo from '../assets/logo.svg'
 import profileIcon from '../assets/profileIcon.svg'
 
