@@ -2,7 +2,21 @@
 export default {
   content: ['./src/**/*.{jsx,tsx}'],
   theme: {
-    extend: {},
+    extend: {
+      colors: {
+        ens: {
+          blue: {
+            surface: '#EEF5FF',
+          },
+          grey: {
+            surface: '#F6F6F6',
+          },
+          additional: {
+            border: '#E8E8E8',
+          },
+        },
+      },
+    },
   },
   plugins: [],
 }
