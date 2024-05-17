@@ -1,9 +1,13 @@
-import { Heading } from '@ensdomains/thorin'
+import { Button, Heading } from '@ensdomains/thorin'
 
 export function Home() {
   return (
     <>
-      <Heading>Vite + React</Heading>
+      <Heading className="mb-4">ENS Delegation</Heading>
+
+      <Button as="a" href="/strategy">
+        Start
+      </Button>
     </>
   )
 }

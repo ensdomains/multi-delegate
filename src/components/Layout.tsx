@@ -7,6 +7,9 @@ export const Layout = styled.div(
     flex-direction: column;
 
     width: 100%;
+    max-width: ${theme.breakpoints.xl}px;
+    margin-right: auto;
+    margin-left: auto;
     min-height: 100svh;
     gap: ${theme.space['6']};
     padding: ${theme.space['4']};
