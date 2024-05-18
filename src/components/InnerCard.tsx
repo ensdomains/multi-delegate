@@ -9,7 +9,7 @@ export function InnerCard({ children, className }: Props) {
   return (
     <div
       className={clsx([
-        'bg-ens-grey-surface rounded-lg p-2 text-center',
+        'bg-ens-grey-surface rounded-lg p-4 text-center',
         className,
       ])}
     >

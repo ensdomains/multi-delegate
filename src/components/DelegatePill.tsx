@@ -1,8 +1,9 @@
 import { Typography } from '@ensdomains/thorin'
-import { Address, formatUnits } from 'viem'
+import { Address } from 'viem'
 import { useEnsAvatar, useEnsName } from 'wagmi'
 
 import profileIcon from '../assets/profileIcon.svg'
+import { NULL, formatNumber, truncateAddress } from '../lib/utils'
 
 type Props = {
   address: Address | undefined
@@ -13,9 +14,10 @@ export function DelegatePill({ address, amount }: Props) {
   const { data: name } = useEnsName({ address })
   const { data: avatar } = useEnsAvatar({ name: name || undefined })
 
-  const normalizedAmount = parseFloat(
-    formatUnits(amount || BigInt(0), 18)
-  ).toFixed(2)
+  const normalizedAmount = formatNumber(amount)
+  const isUndelegated = address === NULL
+
+  if (!address) return null
 
   return (
     <div className="border-ens-additional-border flex w-fit items-center gap-2 rounded-full border bg-white p-1">
@@ -26,7 +28,9 @@ export function DelegatePill({ address, amount }: Props) {
         height={32}
       />
 
-      <Typography weight="bold">{name || address}</Typography>
+      <Typography weight="bold">
+        {isUndelegated ? 'Undelegated' : name || truncateAddress(address)}
+      </Typography>
 
       <div className="bg-ens-blue-surface rounded-full px-3 py-1">
         <Typography weight="bold">{normalizedAmount}</Typography>
