@@ -1,4 +1,4 @@
-import { Profile } from '@ensdomains/thorin'
+import { Profile, Typography } from '@ensdomains/thorin'
 import { useConnectModal } from '@rainbow-me/rainbowkit'
 import { Link } from 'react-router-dom'
 import { useAccount, useDisconnect } from 'wagmi'
@@ -19,8 +19,16 @@ export function Nav() {
         </Link>
 
         <div className="flex gap-4">
-          <Link to="https://ensdao.org/">DAO</Link>
-          <Link to="https://app.ens.domains/">App</Link>
+          <Link to="https://ensdao.org/">
+            <Typography asProp="span" color="grey" weight="bold">
+              DAO
+            </Typography>
+          </Link>
+          <Link to="https://app.ens.domains/">
+            <Typography asProp="span" color="grey" weight="bold">
+              App
+            </Typography>
+          </Link>
         </div>
       </div>
 

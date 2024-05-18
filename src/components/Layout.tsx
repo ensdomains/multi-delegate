@@ -11,7 +11,7 @@ export const Layout = styled.div(
     margin-right: auto;
     margin-left: auto;
     min-height: 100svh;
-    gap: ${theme.space['6']};
+    gap: ${theme.space['8']};
     padding: ${theme.space['4']};
 
     ${mq.sm.min(css`

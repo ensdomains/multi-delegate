@@ -466,7 +466,7 @@ export const ensTokenContract = {
 } as const
 
 export const erc20MultiDelegateContract = {
-  address: '0x0000000000000000000000000000000000000000',
+  address: '0xunknown',
   abi: [
     {
       inputs: [
