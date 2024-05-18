@@ -11,6 +11,7 @@ import { useConnectModal } from '@rainbow-me/rainbowkit'
 import clsx from 'clsx'
 import { useAccount, useReadContracts } from 'wagmi'
 
+import { ButtonWrapper } from '../components/ButtonWrapper'
 import { DelegatePill } from '../components/DelegatePill'
 import { InnerCard } from '../components/InnerCard'
 import { ensTokenContract, erc20MultiDelegateContract } from '../lib/contracts'
@@ -88,7 +89,7 @@ export function Strategy() {
           )
         })()}
 
-        <div className="mx-auto flex w-fit gap-2">
+        <ButtonWrapper>
           {(() => {
             if (!address) {
               return (
@@ -133,7 +134,7 @@ export function Strategy() {
               </>
             )
           })()}
-        </div>
+        </ButtonWrapper>
       </Card>
     </>
   )

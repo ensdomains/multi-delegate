@@ -1,13 +1,39 @@
-import { Button, Card, Heading } from '@ensdomains/thorin'
+import { Button, Card, Heading, PlusSVG } from '@ensdomains/thorin'
+import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { Address } from 'viem'
 import { useAccount, useReadContracts, useWriteContract } from 'wagmi'
 
+import { ButtonWrapper } from '../components/ButtonWrapper'
+import { DelegateRow } from '../components/DelegateRow'
+import { SmallCard } from '../components/SmallCard'
 import { ensTokenContract, erc20MultiDelegateContract } from '../lib/contracts'
+import { formatNumber } from '../lib/utils'
+
+type DelegateSelection = {
+  address: Address
+  amount: string
+}
 
 export function Manage() {
   const { address } = useAccount()
   const write = useWriteContract()
   const navigate = useNavigate()
+  const [delegates, setDelegates] = useState<DelegateSelection[]>([
+    {
+      address: '0xb8c2C29ee19D8307cb7255e1Cd9CbDE883A267d5',
+      amount: '100',
+    },
+    {
+      address: '0x534631Bcf33BDb069fB20A93d2fdb9e4D4dD42CF',
+      amount: '250',
+    },
+  ])
+
+  const allocatedAmount = delegates.reduce(
+    (total, { amount }) => total + Number(amount),
+    0
+  )
 
   const { data: delegateInfo } = useReadContracts({
     contracts: [
@@ -26,7 +52,7 @@ export function Manage() {
 
   const [delegateFromTokenContract, balance] = delegateInfo || []
 
-  if (!address || balance?.result === 0n) {
+  if (!address) {
     return navigate('/strategy')
   }
 
@@ -50,10 +76,41 @@ export function Manage() {
     <>
       <Heading className="mb-4">Manage Strategy</Heading>
 
-      <Card className="text-center">
-        <div className="mx-auto flex w-fit gap-2">
-          <Button onClick={handleUpdate}>Update</Button>
+      <Card>
+        <SmallCard>
+          <DelegateRow
+            address={address}
+            amount={formatNumber(balance?.result, 'string')}
+          />
+        </SmallCard>
+
+        <SmallCard>
+          {delegates.map(({ address, amount }, index) => (
+            <>
+              <DelegateRow key={index} address={address} amount={amount} />
+
+              {/* If its not the last delegate, add a divider */}
+              {index !== delegates.length - 1 && <SmallCard.Divider />}
+            </>
+          ))}
+        </SmallCard>
+
+        <ButtonWrapper>
+          <Button prefix={<PlusSVG />}>Add delegate</Button>
+        </ButtonWrapper>
+
+        <div className="py-1">
+          <Card.Divider />
         </div>
+
+        <ButtonWrapper>
+          <Button
+            onClick={handleUpdate}
+            disabled={allocatedAmount > formatNumber(balance?.result, 'number')}
+          >
+            Update
+          </Button>
+        </ButtonWrapper>
       </Card>
     </>
   )

@@ -14,7 +14,7 @@ export function DelegatePill({ address, amount }: Props) {
   const { data: name } = useEnsName({ address })
   const { data: avatar } = useEnsAvatar({ name: name || undefined })
 
-  const normalizedAmount = formatNumber(amount)
+  const normalizedAmount = formatNumber(amount, 'string')
   const isUndelegated = address === NULL
 
   if (!address) return null
