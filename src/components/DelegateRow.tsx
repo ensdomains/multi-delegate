@@ -4,7 +4,7 @@ import { useAccount, useEnsAvatar, useEnsName } from 'wagmi'
 
 import profileIcon from '../assets/profileIcon.svg'
 import tokenIcon from '../assets/tokenIcon.svg'
-import { truncateAddress } from '../lib/utils'
+import { NULL, truncateAddress } from '../lib/utils'
 import { DelegateSelection } from '../screens/Manage'
 
 type Props = {
@@ -17,7 +17,9 @@ export function DelegateRow({ address, amount, setDelegates }: Props) {
   const { address: connectedAddress } = useAccount()
   const { data: name } = useEnsName({ address })
   const { data: avatar } = useEnsAvatar({ name: name || undefined })
+
   const isConnectedAddress = address === connectedAddress
+  const isUndelegated = address === NULL
 
   function setDelegateAmount(newAmount: string) {
     if (!setDelegates || !address) return
@@ -44,7 +46,9 @@ export function DelegateRow({ address, amount, setDelegates }: Props) {
         <Typography asProp="span" weight="bold">
           {isConnectedAddress
             ? 'Wallet balance'
-            : name || truncateAddress(address)}
+            : isUndelegated
+              ? 'Undelegated'
+              : name || truncateAddress(address)}
         </Typography>
       </div>
 
