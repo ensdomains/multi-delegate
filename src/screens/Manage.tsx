@@ -10,28 +10,23 @@ import { SmallCard } from '../components/SmallCard'
 import { ensTokenContract, erc20MultiDelegateContract } from '../lib/contracts'
 import { formatNumber } from '../lib/utils'
 
-type DelegateSelection = {
-  address: Address
-  amount: string
-}
+export type DelegateSelection = Map<Address, string>
 
 export function Manage() {
   const { address } = useAccount()
   const write = useWriteContract()
   const navigate = useNavigate()
-  const [delegates, setDelegates] = useState<DelegateSelection[]>([
-    {
-      address: '0xb8c2C29ee19D8307cb7255e1Cd9CbDE883A267d5',
-      amount: '100',
-    },
-    {
-      address: '0x534631Bcf33BDb069fB20A93d2fdb9e4D4dD42CF',
-      amount: '250',
-    },
-  ])
 
-  const allocatedAmount = delegates.reduce(
-    (total, { amount }) => total + Number(amount),
+  const [delegates, setDelegates] = useState<DelegateSelection>(
+    new Map([
+      ['0xb8c2C29ee19D8307cb7255e1Cd9CbDE883A267d5', '100'],
+      ['0x534631Bcf33BDb069fB20A93d2fdb9e4D4dD42CF', '250'],
+    ])
+  )
+
+  const delegatesArr = Array.from(delegates)
+  const allocatedAmount = delegatesArr.reduce(
+    (acc, [, amount]) => acc + Number(amount),
     0
   )
 
@@ -85,12 +80,17 @@ export function Manage() {
         </SmallCard>
 
         <SmallCard>
-          {delegates.map(({ address, amount }, index) => (
+          {delegatesArr.map(([address, amount], index) => (
             <>
-              <DelegateRow key={index} address={address} amount={amount} />
+              <DelegateRow
+                key={index}
+                address={address}
+                amount={amount}
+                setDelegates={setDelegates}
+              />
 
               {/* If its not the last delegate, add a divider */}
-              {index !== delegates.length - 1 && <SmallCard.Divider />}
+              {index !== delegatesArr.length - 1 && <SmallCard.Divider />}
             </>
           ))}
         </SmallCard>
@@ -106,7 +106,10 @@ export function Manage() {
         <ButtonWrapper>
           <Button
             onClick={handleUpdate}
-            disabled={allocatedAmount > formatNumber(balance?.result, 'number')}
+            disabled={
+              isNaN(allocatedAmount) ||
+              allocatedAmount > formatNumber(balance?.result, 'number')
+            }
           >
             Update
           </Button>
