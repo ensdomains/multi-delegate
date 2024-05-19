@@ -1,6 +1,8 @@
 import { Card } from '@ensdomains/thorin'
 import clsx from 'clsx'
 
+import { Divider as BaseDivider } from '../components/Divider'
+
 type Props = {
   children: React.ReactNode
   className?: React.HTMLAttributes<HTMLDivElement>['className']
@@ -11,7 +13,7 @@ function Parent({ children, className }: Props) {
 }
 
 function Divider() {
-  return <hr className="border-ens-additional-border mx-[-1rem]" />
+  return <BaseDivider className="mx-[-1rem]" />
 }
 
 export const SmallCard = Object.assign(Parent, { Divider })
