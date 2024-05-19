@@ -1,9 +1,18 @@
+import { Address } from 'viem'
 import { formatUnits } from 'viem/utils'
+
+import { erc20MultiDelegateContract } from './contracts'
 
 export const NULL = '0x0000000000000000000000000000000000000000'
 
 export function truncateAddress(address: string) {
   return `${address.slice(0, 6)}...${address.slice(-4)}`
+}
+
+export function checkIfUsingMultiDelegate(
+  delegateFromTokenContract: Address | undefined
+) {
+  return delegateFromTokenContract === erc20MultiDelegateContract.address
 }
 
 // prettier-ignore

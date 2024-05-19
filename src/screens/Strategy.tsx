@@ -14,8 +14,8 @@ import { useAccount, useReadContracts } from 'wagmi'
 import { ButtonWrapper } from '../components/ButtonWrapper'
 import { DelegatePill } from '../components/DelegatePill'
 import { InnerCard } from '../components/InnerCard'
-import { ensTokenContract, erc20MultiDelegateContract } from '../lib/contracts'
-import { NULL } from '../lib/utils'
+import { ensTokenContract } from '../lib/contracts'
+import { NULL, checkIfUsingMultiDelegate } from '../lib/utils'
 
 export function Strategy() {
   const { address } = useAccount()
@@ -36,10 +36,13 @@ export function Strategy() {
     ],
   })
 
-  const [delegateFromTokenContract, balance] = delegateInfo || []
+  const [_delegateFromTokenContract, _balance] = delegateInfo || []
+  const balance = _balance?.result
+  const delegateFromTokenContract = _delegateFromTokenContract?.result
 
-  // prettier-ignore
-  const isUsingMultiDelegate = delegateFromTokenContract?.result === erc20MultiDelegateContract.address
+  const isUsingMultiDelegate = checkIfUsingMultiDelegate(
+    delegateFromTokenContract
+  )
 
   return (
     <>
@@ -62,7 +65,7 @@ export function Strategy() {
             )
           }
 
-          if (balance?.result === 0n) {
+          if (balance === 0n) {
             return (
               <Helper type="warning">
                 <Typography asProp="p">
@@ -80,8 +83,8 @@ export function Strategy() {
               ) : (
                 <div className="flex flex-wrap justify-center gap-2">
                   <DelegatePill
-                    address={delegateFromTokenContract?.result}
-                    amount={balance?.result}
+                    address={delegateFromTokenContract}
+                    amount={balance}
                   />
                 </div>
               )}
@@ -99,10 +102,9 @@ export function Strategy() {
               )
             }
 
-            const btnDisabled = balance?.result === 0n
+            const btnDisabled = balance === 0n
             const isUndelegated =
-              !isUsingMultiDelegate &&
-              delegateFromTokenContract?.result === NULL
+              !isUsingMultiDelegate && delegateFromTokenContract === NULL
 
             return (
               <>

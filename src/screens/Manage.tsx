@@ -1,14 +1,14 @@
 import { Button, Card, Heading, PlusSVG } from '@ensdomains/thorin'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Address } from 'viem'
+import { Address, formatUnits } from 'viem'
 import { useAccount, useReadContracts, useWriteContract } from 'wagmi'
 
 import { ButtonWrapper } from '../components/ButtonWrapper'
 import { DelegateRow } from '../components/DelegateRow'
 import { SmallCard } from '../components/SmallCard'
 import { ensTokenContract, erc20MultiDelegateContract } from '../lib/contracts'
-import { formatNumber } from '../lib/utils'
+import { checkIfUsingMultiDelegate, formatNumber } from '../lib/utils'
 
 export type DelegateSelection = Map<Address, string>
 
@@ -17,13 +17,7 @@ export function Manage() {
   const write = useWriteContract()
   const navigate = useNavigate()
 
-  const [delegates, setDelegates] = useState<DelegateSelection>(
-    new Map([
-      ['0xb8c2C29ee19D8307cb7255e1Cd9CbDE883A267d5', '100'],
-      ['0x534631Bcf33BDb069fB20A93d2fdb9e4D4dD42CF', '250'],
-    ])
-  )
-
+  const [delegates, setDelegates] = useState<DelegateSelection>(new Map())
   const delegatesArr = Array.from(delegates)
   const allocatedAmount = delegatesArr.reduce(
     (acc, [, amount]) => acc + Number(amount),
@@ -45,26 +39,54 @@ export function Manage() {
     ],
   })
 
-  const [delegateFromTokenContract, balance] = delegateInfo || []
+  const [_delegateFromTokenContract, _balance] = delegateInfo || []
+  const balance = _balance?.result
+  const delegateFromTokenContract = _delegateFromTokenContract?.result
 
-  if (!address) {
+  const isUsingMultiDelegate = checkIfUsingMultiDelegate(
+    delegateFromTokenContract
+  )
+
+  // Set the initial delegates
+  useEffect(() => {
+    if (!delegateFromTokenContract || !balance) return
+
+    if (!isUsingMultiDelegate) {
+      setDelegates(
+        new Map([
+          ...delegates,
+          [delegateFromTokenContract, formatUnits(balance, 18)],
+        ])
+      )
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [delegateFromTokenContract])
+
+  // Redirect if the user is not connected or has 0 tokens to make error handling easier
+  if (!address || balance === 0n) {
     return navigate('/strategy')
   }
 
   function handleUpdate() {
-    // If the user has 1 delegate selected, use the token contract directly
-    write.writeContract({
-      ...ensTokenContract,
-      functionName: 'delegate',
-      args: ['0x0000000000000000000000000000000000000000'],
-    })
-
-    // If the user has multiple delegates selected, use the multiDelegate contract
-    // write.writeContract({
-    //   ...erc20MultiDelegateContract,
-    //   functionName: 'delegateMulti',
-    //   args: [],
-    // })
+    if (delegatesArr.length === 1) {
+      // If the user has 1 delegate selected, use the token contract directly
+      write.writeContract({
+        ...ensTokenContract,
+        functionName: 'delegate',
+        args: ['0x0000000000000000000000000000000000000000'],
+      })
+    } else {
+      // If the user has multiple delegates selected, use the multiDelegate contract
+      write.writeContract({
+        ...erc20MultiDelegateContract,
+        functionName: 'delegateMulti',
+        args: [
+          [], // sources[]
+          [], // targets[]
+          [], // amounts[]
+        ],
+      })
+    }
   }
 
   return (
@@ -75,7 +97,7 @@ export function Manage() {
         <SmallCard>
           <DelegateRow
             address={address}
-            amount={formatNumber(balance?.result, 'string')}
+            amount={formatNumber(balance, 'string')}
           />
         </SmallCard>
 
@@ -108,7 +130,7 @@ export function Manage() {
             onClick={handleUpdate}
             disabled={
               isNaN(allocatedAmount) ||
-              allocatedAmount > formatNumber(balance?.result, 'number')
+              allocatedAmount > formatNumber(balance, 'number')
             }
           >
             Update
