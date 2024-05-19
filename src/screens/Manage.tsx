@@ -6,6 +6,7 @@ import { useAccount, useReadContracts, useWriteContract } from 'wagmi'
 
 import { ButtonWrapper } from '../components/ButtonWrapper'
 import { DelegateRow } from '../components/DelegateRow'
+import { SearchModal } from '../components/SearchModal'
 import { SmallCard } from '../components/SmallCard'
 import { ensTokenContract, erc20MultiDelegateContract } from '../lib/contracts'
 import { checkIfUsingMultiDelegate, formatNumber } from '../lib/utils'
@@ -16,6 +17,7 @@ export function Manage() {
   const { address } = useAccount()
   const write = useWriteContract()
   const navigate = useNavigate()
+  const [isModalOpen, setIsModalOpen] = useState(false)
 
   const [delegates, setDelegates] = useState<DelegateSelection>(new Map())
   const delegatesArr = Array.from(delegates)
@@ -64,7 +66,7 @@ export function Manage() {
 
   // Redirect if the user is not connected or has 0 tokens to make error handling easier
   if (!address || balance === 0n) {
-    return navigate('/strategy')
+    navigate('/strategy')
   }
 
   function handleUpdate() {
@@ -118,7 +120,9 @@ export function Manage() {
         </SmallCard>
 
         <ButtonWrapper>
-          <Button prefix={<PlusSVG />}>Add delegate</Button>
+          <Button prefix={<PlusSVG />} onClick={() => setIsModalOpen(true)}>
+            Add delegate
+          </Button>
         </ButtonWrapper>
 
         <div className="py-1">
@@ -137,6 +141,13 @@ export function Manage() {
           </Button>
         </ButtonWrapper>
       </Card>
+
+      <SearchModal
+        isOpen={isModalOpen}
+        delegates={delegates}
+        setDelegates={setDelegates}
+        close={() => setIsModalOpen(false)}
+      />
     </>
   )
 }
