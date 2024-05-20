@@ -1,4 +1,5 @@
 import { Input, Typography } from '@ensdomains/thorin'
+import clsx from 'clsx'
 import { Address } from 'viem'
 import { useAccount, useEnsAvatar, useEnsName } from 'wagmi'
 
@@ -11,9 +12,15 @@ type Props = {
   address: Address | undefined
   amount: string | undefined
   setDelegates?: React.Dispatch<React.SetStateAction<DelegateSelection>>
+  className?: React.HTMLAttributes<HTMLDivElement>['className']
 }
 
-export function DelegateRow({ address, amount, setDelegates }: Props) {
+export function DelegateRow({
+  address,
+  amount,
+  setDelegates,
+  className,
+}: Props) {
   const { address: connectedAddress } = useAccount()
   const { data: name } = useEnsName({ address })
   const { data: avatar } = useEnsAvatar({ name: name || undefined })
@@ -34,7 +41,7 @@ export function DelegateRow({ address, amount, setDelegates }: Props) {
   if (!address) return null
 
   return (
-    <div className="flex w-full">
+    <div className={clsx('flex w-full', className)}>
       <div className="flex w-full items-center gap-2">
         <img
           className="rounded-full"

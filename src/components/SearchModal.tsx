@@ -1,24 +1,43 @@
 import {
+  AlertSVG,
   Button,
   Dialog,
   Input,
+  MagnifyingGlassSVG,
   MagnifyingGlassSimpleSVG,
+  Spinner,
+  Typography,
 } from '@ensdomains/thorin'
-import { useState } from 'react'
+import clsx from 'clsx'
+import { useDebounceValue } from 'usehooks-ts'
 import { Address } from 'viem'
 
+import { useDelegateSearch } from '../hooks/useDelegateSearch'
 import { DelegateSelection } from '../screens/Manage'
 import { Divider } from './Divider'
 import { SearchResult } from './SearchResult'
 
 type Props = {
   isOpen: boolean
-  close: () => void
   delegates: DelegateSelection
+  setIsModalOpen: React.Dispatch<React.SetStateAction<boolean>>
   setDelegates: React.Dispatch<React.SetStateAction<DelegateSelection>>
 }
 
-export function SearchModal({ isOpen, close, delegates, setDelegates }: Props) {
+export function SearchModal({
+  isOpen,
+  delegates,
+  setIsModalOpen,
+  setDelegates,
+}: Props) {
+  const [searchQuery, setSearchQuery] = useDebounceValue<string>('', 500)
+  const search = useDelegateSearch(searchQuery)
+
+  function close() {
+    setIsModalOpen(false)
+    setSearchQuery('')
+  }
+
   function addDelegate(address: Address) {
     setDelegates(
       new Map([
@@ -29,16 +48,6 @@ export function SearchModal({ isOpen, close, delegates, setDelegates }: Props) {
 
     close()
   }
-
-  const [searchResults, setSearchResults] = useState<
-    { name: string; address: Address }[]
-  >([
-    { name: 'dom.eth', address: '0xbF7e3C8B16Ae63FC74e8d35C3F5eA8A6A2A7995E' },
-    {
-      name: 'domico.eth',
-      address: '0x0b08dA7068b73A579Bd5E8a8290ff8afd37bc32A',
-    },
-  ])
 
   return (
     <Dialog
@@ -53,23 +62,55 @@ export function SearchModal({ isOpen, close, delegates, setDelegates }: Props) {
         label=""
         hideLabel
         placeholder="ENS name or Ethereum address"
+        onChange={(e) => setSearchQuery(e.target.value)}
         prefix={<MagnifyingGlassSimpleSVG />}
       />
 
-      <div className="flex h-44 w-[38rem] max-w-full flex-col gap-3 overflow-y-scroll sm:w-[30rem]">
-        {searchResults.map(({ name, address }, index) => (
-          <>
-            <SearchResult
-              key={address}
-              name={name}
-              address={address}
-              addDelegate={addDelegate}
-            />
+      <div
+        className={clsx(
+          '-my-3 flex h-48 w-[38rem] max-w-full flex-col overflow-y-scroll sm:w-[30rem]',
+          (search.data?.length === 0 || search.isLoading || search.isError) &&
+            'items-center justify-center'
+        )}
+      >
+        {(() => {
+          if (search.isLoading) {
+            return <Spinner size="medium" color="blue" />
+          }
 
-            {/* If its not the last delegate, add a divider */}
-            {index !== searchResults.length - 1 && <Divider />}
-          </>
-        ))}
+          if (search.data?.length === 0 || search.isError) {
+            const emptyQuery = searchQuery === ''
+
+            return (
+              <>
+                {emptyQuery ? (
+                  <MagnifyingGlassSVG className="text-ens-blue-primary mb-2 h-5 w-5" />
+                ) : search.isError ? (
+                  <AlertSVG className="text-ens-red-primary mb-2 h-5 w-5" />
+                ) : (
+                  <AlertSVG className="text-ens-yellow-primary mb-2 h-5 w-5" />
+                )}
+
+                <Typography className="w-40 text-center">
+                  {emptyQuery
+                    ? 'Search for an ENS name or ETH address'
+                    : search.isError
+                      ? 'Error fetching names'
+                      : 'No results found'}
+                </Typography>
+              </>
+            )
+          }
+
+          return search.data?.map(({ name }, index) => (
+            <div key={name} className="w-full">
+              <SearchResult name={name} addDelegate={addDelegate} />
+
+              {/* If its not the last delegate, add a divider */}
+              {index !== search.data.length - 1 && <Divider />}
+            </div>
+          ))
+        })()}
       </div>
 
       <Divider />

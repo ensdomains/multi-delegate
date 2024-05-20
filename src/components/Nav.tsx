@@ -47,7 +47,7 @@ export function Nav() {
         />
       ) : (
         <img
-          className="transition ease-in-out hover:-translate-y-[1px] hover:opacity-75"
+          className="transition hover:-translate-y-[1px] hover:opacity-75"
           src={profileIcon}
           onClick={openConnectModal}
         />
