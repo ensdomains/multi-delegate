@@ -105,17 +105,17 @@ export function Manage() {
 
         <SmallCard>
           {delegatesArr.map(([address, amount], index) => (
-            <>
+            <div key={address}>
               <DelegateRow
-                key={index}
                 address={address}
                 amount={amount}
                 setDelegates={setDelegates}
+                className="pb-3 last:pb-0"
               />
 
               {/* If its not the last delegate, add a divider */}
               {index !== delegatesArr.length - 1 && <SmallCard.Divider />}
-            </>
+            </div>
           ))}
         </SmallCard>
 
@@ -146,7 +146,7 @@ export function Manage() {
         isOpen={isModalOpen}
         delegates={delegates}
         setDelegates={setDelegates}
-        close={() => setIsModalOpen(false)}
+        setIsModalOpen={setIsModalOpen}
       />
     </>
   )
