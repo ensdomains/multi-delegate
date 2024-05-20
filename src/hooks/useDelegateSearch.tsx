@@ -38,8 +38,15 @@ export function useDelegateSearch(searchQuery: string) {
         data: { domains: { name: string }[] }
       }
 
-      // Fake search results
-      return json.data.domains
+      // If `searchQuery` is in the list of domains, remove it
+      const names = json.data.domains.filter((d) => d.name !== searchQuery)
+
+      // If `searchQuery` is a potential domain, add it to the top of the list
+      if (searchQuery.includes('.') && searchQuery.length > 3) {
+        names.unshift({ name: searchQuery })
+      }
+
+      return names
     },
   })
 }
