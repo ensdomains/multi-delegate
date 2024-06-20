@@ -114,7 +114,7 @@ export function Strategy() {
                     colorStyle="blueSecondary"
                     onClick={async () => {
                       await navigator.clipboard.writeText(
-                        `http://localhost:5173/strategy/${address}`
+                        `${window.location.origin}/strategy/${address}`
                       )
 
                       alert('Copied to clipboard')
