@@ -9,12 +9,12 @@ import {
 } from '@ensdomains/thorin'
 import { useConnectModal } from '@rainbow-me/rainbowkit'
 import clsx from 'clsx'
+import { ensTokenContract } from 'shared/contracts'
 import { useAccount, useReadContracts } from 'wagmi'
 
 import { ButtonWrapper } from '../components/ButtonWrapper'
 import { DelegatePill } from '../components/DelegatePill'
 import { InnerCard } from '../components/InnerCard'
-import { ensTokenContract } from '../lib/contracts'
 import { NULL, checkIfUsingMultiDelegate } from '../lib/utils'
 
 export function Strategy() {
