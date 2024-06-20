@@ -1,7 +1,7 @@
 import { Input, Typography } from '@ensdomains/thorin'
 import clsx from 'clsx'
 import { Address } from 'viem'
-import { useAccount, useEnsAvatar, useEnsName } from 'wagmi'
+import { useEnsAvatar, useEnsName } from 'wagmi'
 
 import profileIcon from '../assets/profileIcon.svg'
 import tokenIcon from '../assets/tokenIcon.svg'
@@ -9,6 +9,7 @@ import { NULL, truncateAddress } from '../lib/utils'
 import { DelegateSelection } from '../screens/Manage'
 
 type Props = {
+  isBalance?: boolean
   address: Address | undefined
   amount: string | undefined
   setDelegates?: React.Dispatch<React.SetStateAction<DelegateSelection>>
@@ -16,16 +17,15 @@ type Props = {
 }
 
 export function DelegateRow({
+  isBalance,
   address,
   amount,
   setDelegates,
   className,
 }: Props) {
-  const { address: connectedAddress } = useAccount()
   const { data: name } = useEnsName({ address })
   const { data: avatar } = useEnsAvatar({ name: name || undefined })
 
-  const isConnectedAddress = address === connectedAddress
   const isUndelegated = address === NULL
 
   function setDelegateAmount(newAmount: string) {
@@ -45,13 +45,13 @@ export function DelegateRow({
       <div className="flex w-full items-center gap-2">
         <img
           className="rounded-full"
-          src={isConnectedAddress ? tokenIcon : avatar || profileIcon}
+          src={isBalance ? tokenIcon : avatar || profileIcon}
           width={40}
           height={40}
         />
 
         <Typography asProp="span" weight="bold">
-          {isConnectedAddress
+          {isBalance
             ? 'Wallet balance'
             : isUndelegated
               ? 'Undelegated'
@@ -67,8 +67,8 @@ export function DelegateRow({
           hideLabel
           value={amount}
           onChange={(e) => setDelegateAmount(e.target.value)}
-          error={amount && !/^\d+$/.test(amount) ? true : false}
-          disabled={isConnectedAddress}
+          error={amount && !/^[0-9,.]+$/.test(amount) ? true : false}
+          disabled={isBalance}
         />
       </div>
     </div>

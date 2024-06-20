@@ -1,3 +1,6 @@
 export const GRAPH_URL =
   import.meta.env.VITE_PUBLIC_GRAPH_URL ||
   'https://api.thegraph.com/subgraphs/name/ensdomains/ens'
+
+export const RPC_URL =
+  import.meta.env.VITE_PUBLIC_RPC_URL || 'https://cloudflare-eth.com'

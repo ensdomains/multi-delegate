@@ -1,7 +1,7 @@
 import { Button, Card, Heading, PlusSVG } from '@ensdomains/thorin'
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Address, formatUnits } from 'viem'
+import { Address, formatUnits, parseUnits } from 'viem'
 import { useAccount, useReadContracts, useWriteContract } from 'wagmi'
 
 import { ButtonWrapper } from '../components/ButtonWrapper'
@@ -21,9 +21,16 @@ export function Manage() {
 
   const [delegates, setDelegates] = useState<DelegateSelection>(new Map())
   const delegatesArr = Array.from(delegates)
-  const allocatedAmount = delegatesArr.reduce(
+
+  // Count the total voting power of the selected delegates
+  const allocatedVotingPower = delegatesArr.reduce(
     (acc, [, amount]) => acc + Number(amount),
     0
+  )
+
+  // Count the number of delegates with >0 amount
+  const allocatedDelegates = delegatesArr.filter(
+    ([, amount]) => Number(amount) > 0
   )
 
   const { data: delegateInfo } = useReadContracts({
@@ -31,19 +38,28 @@ export function Manage() {
       {
         ...ensTokenContract,
         functionName: 'delegates',
-        args: address ? [address] : undefined,
+        // @ts-expect-error: If the user is not connected, we'll redirect them
+        args: [address],
       },
       {
         ...ensTokenContract,
         functionName: 'balanceOf',
-        args: address ? [address] : undefined,
+        // @ts-expect-error: If the user is not connected, we'll redirect them
+        args: [address],
+      },
+      {
+        ...ensTokenContract,
+        functionName: 'allowance',
+        // @ts-expect-error: If the user is not connected, we'll redirect them
+        args: [address, erc20MultiDelegateContract.address],
       },
     ],
   })
 
-  const [_delegateFromTokenContract, _balance] = delegateInfo || []
+  const [_delegateFromTokenContract, _balance, _allowance] = delegateInfo || []
   const balance = _balance?.result
   const delegateFromTokenContract = _delegateFromTokenContract?.result
+  const allowance = _allowance?.result
 
   const isUsingMultiDelegate = checkIfUsingMultiDelegate(
     delegateFromTokenContract
@@ -70,22 +86,35 @@ export function Manage() {
   }
 
   function handleUpdate() {
-    if (delegatesArr.length === 1) {
+    if (!address) return
+
+    if (allocatedDelegates.length === 0) {
+      alert('Please allocate some tokens to a delegate')
+    } else if (allocatedDelegates.length === 1) {
+      console.log('Delegating via the token contract')
+
       // If the user has 1 delegate selected, use the token contract directly
       write.writeContract({
         ...ensTokenContract,
         functionName: 'delegate',
-        args: ['0x0000000000000000000000000000000000000000'],
+        args: [allocatedDelegates[0][0]],
       })
     } else {
+      console.log('Delegating via the multiDelegate contract')
+
+      if (allocatedDelegates.map((del) => del[0]).includes(address)) {
+        alert('You cannot delegate to yourself')
+        return
+      }
+
       // If the user has multiple delegates selected, use the multiDelegate contract
       write.writeContract({
         ...erc20MultiDelegateContract,
         functionName: 'delegateMulti',
         args: [
           [], // sources[]
-          [], // targets[]
-          [], // amounts[]
+          allocatedDelegates.map((del) => BigInt(del[0])), // targets[]
+          allocatedDelegates.map((del) => parseUnits(del[1], 18)), // amounts[]
         ],
       })
     }
@@ -98,6 +127,7 @@ export function Manage() {
       <Card>
         <SmallCard>
           <DelegateRow
+            isBalance={true}
             address={address}
             amount={formatNumber(balance, 'string')}
           />
@@ -130,15 +160,43 @@ export function Manage() {
         </div>
 
         <ButtonWrapper>
-          <Button
-            onClick={handleUpdate}
-            disabled={
-              isNaN(allocatedAmount) ||
-              allocatedAmount > formatNumber(balance, 'number')
+          {(() => {
+            // TODO: Let the user allocate tokens from the allowance vs requiring full allowance
+            const hasFullAllowance = !((allowance || 0n) < (balance || 0n))
+
+            if (!hasFullAllowance && allocatedDelegates.length > 1) {
+              return (
+                <Button
+                  disabled={!balance}
+                  onClick={() => {
+                    write.writeContract({
+                      ...ensTokenContract,
+                      functionName: 'approve',
+                      args: [
+                        erc20MultiDelegateContract.address,
+                        // @ts-expect-error: Button is disabled if there is no balance
+                        balance,
+                      ],
+                    })
+                  }}
+                >
+                  Approve
+                </Button>
+              )
             }
-          >
-            Update
-          </Button>
+
+            return (
+              <Button
+                onClick={handleUpdate}
+                disabled={
+                  isNaN(allocatedVotingPower) ||
+                  allocatedVotingPower > formatNumber(balance, 'number')
+                }
+              >
+                Update
+              </Button>
+            )
+          })()}
         </ButtonWrapper>
       </Card>
 
