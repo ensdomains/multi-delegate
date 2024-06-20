@@ -1,11 +1,11 @@
 import { Card, Heading, Helper, Spinner, Typography } from '@ensdomains/thorin'
 import { useParams } from 'react-router-dom'
+import { ensTokenContract } from 'shared/contracts'
 import { Address, isAddress } from 'viem'
 import { useEnsAddress, useEnsName, useReadContracts } from 'wagmi'
 
 import { DelegatePill } from '../components/DelegatePill'
 import { InnerCard } from '../components/InnerCard'
-import { ensTokenContract } from '../lib/contracts'
 import { checkIfUsingMultiDelegate, truncateAddress } from '../lib/utils'
 
 export function SharedStrategy() {

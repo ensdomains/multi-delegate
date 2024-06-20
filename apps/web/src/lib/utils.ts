@@ -1,7 +1,6 @@
+import { erc20MultiDelegateContract } from 'shared/contracts'
 import { Address } from 'viem'
 import { formatUnits } from 'viem/utils'
-
-import { erc20MultiDelegateContract } from './contracts'
 
 export const NULL = '0x0000000000000000000000000000000000000000'
 

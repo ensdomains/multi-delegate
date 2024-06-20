@@ -1,6 +1,7 @@
 import { Button, Card, Heading, PlusSVG } from '@ensdomains/thorin'
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { ensTokenContract, erc20MultiDelegateContract } from 'shared/contracts'
 import { Address, formatUnits, parseUnits } from 'viem'
 import { useAccount, useReadContracts, useWriteContract } from 'wagmi'
 
@@ -8,7 +9,6 @@ import { ButtonWrapper } from '../components/ButtonWrapper'
 import { DelegateRow } from '../components/DelegateRow'
 import { SearchModal } from '../components/SearchModal'
 import { SmallCard } from '../components/SmallCard'
-import { ensTokenContract, erc20MultiDelegateContract } from '../lib/contracts'
 import { checkIfUsingMultiDelegate, formatNumber } from '../lib/utils'
 
 export type DelegateSelection = Map<Address, string>
