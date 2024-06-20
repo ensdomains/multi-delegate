@@ -12,6 +12,11 @@ export function useDelegateSearch(searchQuery: string) {
         return []
       }
 
+      // If the user types in a name directly, we can skip the subgraph query
+      if (searchQuery.endsWith('.eth')) {
+        return [{ name: searchQuery }]
+      }
+
       const res = await fetch(GRAPH_URL, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
