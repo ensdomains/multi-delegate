@@ -37,5 +37,6 @@ ponder.get('/:address', async (c) => {
     amount: balanceOf[index]?.toString(),
   }))
 
-  return c.json(data)
+  // remove delegates with no balance
+  return c.json(data.filter((item) => item.amount !== '0'))
 })
