@@ -1,8 +1,9 @@
+import { toHex } from 'viem'
+
 import { ponder } from '@/generated'
 
 ponder.on('MultiDelegate:DelegationProcessed', async ({ event, context }) => {
   const { DelegationProcessedEvent } = context.db
-  const { from, to, amount } = event.args
 
   await DelegationProcessedEvent.create({
     id: event.log.id,
@@ -12,7 +13,6 @@ ponder.on('MultiDelegate:DelegationProcessed', async ({ event, context }) => {
 
 ponder.on('MultiDelegate:ProxyDeployed', async ({ event, context }) => {
   const { ProxyDeployedEvent } = context.db
-  const { delegate, proxyAddress } = event.args
 
   await ProxyDeployedEvent.create({
     id: event.log.id,
@@ -21,8 +21,9 @@ ponder.on('MultiDelegate:ProxyDeployed', async ({ event, context }) => {
 })
 
 ponder.on('MultiDelegate:TransferBatch', async ({ event, context }) => {
-  const { TransferBatchEvent } = context.db
-  const { operator, from, to, ids, values } = event.args
+  const { Account, TransferBatchEvent } = context.db
+  const { to, ids, values } = event.args
+  const delegates = ids.map((id) => toHex(id))
 
   await TransferBatchEvent.create({
     id: event.log.id,
@@ -31,5 +32,19 @@ ponder.on('MultiDelegate:TransferBatch', async ({ event, context }) => {
       ids: ids.map((id) => id),
       values: values.map((value) => value),
     },
+  })
+
+  if (to === '0x0000000000000000000000000000000000000000') return
+
+  // Store any address that an account has ever delegated to, even if it's currently not
+  // TODO: Store `amount` here as well so we don't need a separate endpoint
+  await Account.upsert({
+    id: to,
+    create: {
+      delegates,
+    },
+    update: ({ current }) => ({
+      delegates: Array.from(new Set([...current.delegates, ...delegates])),
+    }),
   })
 })

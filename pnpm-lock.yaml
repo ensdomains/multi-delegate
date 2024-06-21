@@ -12,15 +12,17 @@ importers:
 
   apps/indexer:
     specifiers:
-      '@ponder/core': ^0.4.40
+      '@ponder/core': 0.5.0-next.1
       '@types/node': ^20.9.0
       eslint: ^8.53.0
       eslint-config-ponder: ^0.4.40
+      hono: ^4.4.7
       shared: workspace:*
       typescript: ^5.2.2
       viem: ^1.19.3
     dependencies:
-      '@ponder/core': 0.4.40_mqq5dkpbpscsp35r2raoejgt4u
+      '@ponder/core': 0.5.0-next.1_ysdc2m5ug54qdd73abcehacn5y
+      hono: 4.4.7
       shared: link:../../packages/shared
       viem: 1.21.4_typescript@5.4.5
     devDependencies:
@@ -1253,11 +1255,12 @@ packages:
     requiresBuild: true
     optional: true
 
-  /@ponder/core/0.4.40_mqq5dkpbpscsp35r2raoejgt4u:
-    resolution: {integrity: sha512-dxLocZj0jElWiGZWet2zg3Awxxdz53NY71+DN2jIzAjCt2KBJX8l5yHaAPDSbWKh18u1iZnvEVcZWsIme6Cnxw==}
+  /@ponder/core/0.5.0-next.1_ysdc2m5ug54qdd73abcehacn5y:
+    resolution: {integrity: sha512-Tgm7hZAvI49BR4UlOANHL2Xx4iqUQ09Nx+6xuiJcBWbmVciRSsf7UDcXVgi67JExTrkR7b5NtVrNLaGNPQ77yQ==}
     engines: {node: '>=18.14'}
     hasBin: true
     peerDependencies:
+      hono: '>=4'
       typescript: '>=5.0.4'
       viem: '>=1.16'
     peerDependenciesMeta:
@@ -1282,7 +1285,6 @@ packages:
       ethereum-bloom-filters: 1.1.0
       glob: 10.4.2
       graphql: 16.8.2
-      graphql-type-json: 0.3.2_graphql@16.8.2
       graphql-yoga: 5.4.0_graphql@16.8.2
       hono: 4.4.7
       http-terminator: 3.2.0
@@ -3934,14 +3936,6 @@ packages:
   /graphemer/1.4.0:
     resolution: {integrity: sha512-EtKwoO6kxCL9WO5xipiHTZlSzBm7WLT627TqC/uVRd0HKmq8NXyebnNYxDoBi7wt8eTWrUrKXCOVaFq9x1kgag==}
     dev: true
-
-  /graphql-type-json/0.3.2_graphql@16.8.2:
-    resolution: {integrity: sha512-J+vjof74oMlCWXSvt0DOf2APEdZOCdubEvGDUAlqH//VBYcOYsGgRW7Xzorr44LvkjiuvecWc8fChxuZZbChtg==}
-    peerDependencies:
-      graphql: '>=0.8.0'
-    dependencies:
-      graphql: 16.8.2
-    dev: false
 
   /graphql-yoga/5.4.0_graphql@16.8.2:
     resolution: {integrity: sha512-o91DJjjAMwhb7PFJFA9yb/K55oCbT+0oFKqbwg5RHWAiy7YMgKMVgmbQFmtGPgkKdfbnJCVdYkX5OF30FTq46g==}
