@@ -15,11 +15,13 @@ import { useAccount, useReadContracts } from 'wagmi'
 import { ButtonWrapper } from '../components/ButtonWrapper'
 import { DelegatePill } from '../components/DelegatePill'
 import { InnerCard } from '../components/InnerCard'
-import { NULL, checkIfUsingMultiDelegate } from '../lib/utils'
+import { useDelegates } from '../hooks/useDelegates'
+import { NULL } from '../lib/utils'
 
 export function Strategy() {
   const { address } = useAccount()
   const { openConnectModal } = useConnectModal()
+  const multiDelegate = useDelegates(address)
 
   const { data: delegateInfo } = useReadContracts({
     contracts: [
@@ -40,9 +42,7 @@ export function Strategy() {
   const balance = _balance?.result
   const delegateFromTokenContract = _delegateFromTokenContract?.result
 
-  const isUsingMultiDelegate = checkIfUsingMultiDelegate(
-    delegateFromTokenContract
-  )
+  const isUsingMultiDelegate = !!multiDelegate.data
 
   return (
     <>
@@ -76,18 +76,25 @@ export function Strategy() {
           }
 
           return (
-            <InnerCard>
-              {isUsingMultiDelegate ? (
-                // I think we have to build an indexer to check the delegates
-                <Typography asProp="p">Already using multi-delegate</Typography>
-              ) : (
-                <div className="flex flex-wrap justify-center gap-2">
+            <InnerCard className="flex flex-wrap justify-center gap-2">
+              <>
+                {/* Delegation from token contract */}
+                {balance && (
                   <DelegatePill
                     address={delegateFromTokenContract}
                     amount={balance}
+                    tooltip="From the token contract"
                   />
-                </div>
-              )}
+                )}
+
+                {/* Delegations from multi-delegate contract */}
+                {multiDelegate.data?.map((delegate) => (
+                  <DelegatePill
+                    address={delegate.delegate}
+                    amount={BigInt(delegate.amount)}
+                  />
+                ))}
+              </>
             </InnerCard>
           )
         })()}

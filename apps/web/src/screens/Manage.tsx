@@ -9,7 +9,8 @@ import { ButtonWrapper } from '../components/ButtonWrapper'
 import { DelegateRow } from '../components/DelegateRow'
 import { SearchModal } from '../components/SearchModal'
 import { SmallCard } from '../components/SmallCard'
-import { checkIfUsingMultiDelegate, formatNumber } from '../lib/utils'
+import { useDelegates } from '../hooks/useDelegates'
+import { formatNumber } from '../lib/utils'
 
 export type DelegateSelection = Map<Address, string>
 
@@ -17,6 +18,7 @@ export function Manage() {
   const { address } = useAccount()
   const write = useWriteContract()
   const navigate = useNavigate()
+  const multiDelegate = useDelegates(address)
   const [isModalOpen, setIsModalOpen] = useState(false)
 
   const [delegates, setDelegates] = useState<DelegateSelection>(new Map())
@@ -37,12 +39,6 @@ export function Manage() {
     contracts: [
       {
         ...ensTokenContract,
-        functionName: 'delegates',
-        // @ts-expect-error: If the user is not connected, we'll redirect them
-        args: [address],
-      },
-      {
-        ...ensTokenContract,
         functionName: 'balanceOf',
         // @ts-expect-error: If the user is not connected, we'll redirect them
         args: [address],
@@ -56,29 +52,25 @@ export function Manage() {
     ],
   })
 
-  const [_delegateFromTokenContract, _balance, _allowance] = delegateInfo || []
+  const [_balance, _allowance] = delegateInfo || []
   const balance = _balance?.result
-  const delegateFromTokenContract = _delegateFromTokenContract?.result
   const allowance = _allowance?.result
-
-  const isUsingMultiDelegate = checkIfUsingMultiDelegate(
-    delegateFromTokenContract
-  )
 
   // Set the initial delegates
   useEffect(() => {
-    if (!delegateFromTokenContract || !balance) return
+    if (!multiDelegate.data) return
 
-    if (!isUsingMultiDelegate) {
-      setDelegates(
-        new Map([
-          ...delegates,
-          [delegateFromTokenContract, formatUnits(balance, 18)],
+    // convert multiDelegate.data to a Map and set it as the initial delegates
+    setDelegates(
+      new Map(
+        multiDelegate.data.map((delegate) => [
+          delegate.delegate,
+          formatUnits(BigInt(delegate.amount), 18),
         ])
       )
-    }
+    )
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [delegateFromTokenContract])
+  }, [multiDelegate.data])
 
   // Redirect if the user is not connected or has 0 tokens to make error handling easier
   if (!address || balance === 0n) {
@@ -92,6 +84,10 @@ export function Manage() {
       alert('Please allocate some tokens to a delegate')
     } else if (allocatedDelegates.length === 1) {
       console.log('Delegating via the token contract')
+
+      alert(
+        'This is going to delegate all of your tokens since you only selected 1 delegate'
+      )
 
       // If the user has 1 delegate selected, use the token contract directly
       write.writeContract({
@@ -186,15 +182,39 @@ export function Manage() {
             }
 
             return (
-              <Button
-                onClick={handleUpdate}
-                disabled={
-                  isNaN(allocatedVotingPower) ||
-                  allocatedVotingPower > formatNumber(balance, 'number')
-                }
-              >
-                Update
-              </Button>
+              <>
+                <Button
+                  colorStyle="blueSecondary"
+                  disabled={!multiDelegate.data}
+                  onClick={() => {
+                    write.writeContract({
+                      ...erc20MultiDelegateContract,
+                      functionName: 'delegateMulti',
+                      args: [
+                        multiDelegate.data!.map((delegate) =>
+                          BigInt(delegate.tokenId)
+                        ), // sources[]
+                        [], // targets[]
+                        multiDelegate.data!.map((delegate) =>
+                          BigInt(delegate.amount)
+                        ), // amounts[]
+                      ],
+                    })
+                  }}
+                >
+                  Reclaim Tokens
+                </Button>
+
+                <Button
+                  onClick={handleUpdate}
+                  disabled={
+                    isNaN(allocatedVotingPower) ||
+                    allocatedVotingPower > formatNumber(balance, 'number')
+                  }
+                >
+                  Update Strategy
+                </Button>
+              </>
             )
           })()}
         </ButtonWrapper>

@@ -1,4 +1,4 @@
-import { Typography } from '@ensdomains/thorin'
+import { Tooltip, Typography } from '@ensdomains/thorin'
 import { Address } from 'viem'
 import { useEnsAvatar, useEnsName } from 'wagmi'
 
@@ -8,9 +8,10 @@ import { NULL, formatNumber, truncateAddress } from '../lib/utils'
 type Props = {
   address: Address | undefined
   amount: bigint | undefined
+  tooltip?: string
 }
 
-export function DelegatePill({ address, amount }: Props) {
+export function DelegatePill({ address, amount, tooltip }: Props) {
   const { data: name } = useEnsName({ address })
   const { data: avatar } = useEnsAvatar({ name: name || undefined })
 
@@ -19,7 +20,7 @@ export function DelegatePill({ address, amount }: Props) {
 
   if (!address) return null
 
-  return (
+  const content = (
     <div className="border-ens-additional-border flex w-fit items-center gap-2 rounded-full border bg-white p-1">
       <img
         className="rounded-full"
@@ -37,4 +38,21 @@ export function DelegatePill({ address, amount }: Props) {
       </div>
     </div>
   )
+
+  if (tooltip) {
+    return (
+      <Tooltip
+        additionalGap={0}
+        content={<div className="text-center">{tooltip}</div>}
+        mobilePlacement="top"
+        mobileWidth={200}
+        placement="top"
+        width={200}
+      >
+        {content}
+      </Tooltip>
+    )
+  }
+
+  return content
 }
