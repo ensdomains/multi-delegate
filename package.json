@@ -1,6 +1,10 @@
 {
   "name": "multi-delegate",
   "private": true,
+  "scripts": {
+    "indexer:start": "pnpm --filter=indexer start",
+    "web:build": "pnpm --filter=web build"
+  },
   "engines": {
     "node": ">=18"
   },
