@@ -14,6 +14,7 @@ type Props = {
   amount: string | undefined
   setDelegates?: React.Dispatch<React.SetStateAction<DelegateSelection>>
   className?: React.HTMLAttributes<HTMLDivElement>['className']
+  description?: string
 }
 
 export function DelegateRow({
@@ -22,6 +23,7 @@ export function DelegateRow({
   amount,
   setDelegates,
   className,
+  description,
 }: Props) {
   const { data: name } = useEnsName({ address })
   const { data: avatar } = useEnsAvatar({ name: name || undefined })
@@ -50,13 +52,21 @@ export function DelegateRow({
           height={40}
         />
 
-        <Typography asProp="span" weight="bold">
-          {isBalance
-            ? 'Wallet balance'
-            : isUndelegated
-              ? 'Undelegated'
-              : name || truncateAddress(address)}
-        </Typography>
+        <div className="flex flex-col">
+          <Typography asProp="span" weight="bold">
+            {isBalance
+              ? 'Wallet balance'
+              : isUndelegated
+                ? 'Undelegated'
+                : name || truncateAddress(address)}
+          </Typography>
+
+          {description && (
+            <Typography fontVariant="small" color="grey">
+              {description}
+            </Typography>
+          )}
+        </div>
       </div>
 
       <div className="flex">

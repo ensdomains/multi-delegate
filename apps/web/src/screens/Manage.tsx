@@ -10,7 +10,7 @@ import { DelegateRow } from '../components/DelegateRow'
 import { SearchModal } from '../components/SearchModal'
 import { SmallCard } from '../components/SmallCard'
 import { useDelegates } from '../hooks/useDelegates'
-import { formatNumber } from '../lib/utils'
+import { formatNumber, truncateAddress } from '../lib/utils'
 
 export type DelegateSelection = Map<Address, string>
 
@@ -39,6 +39,12 @@ export function Manage() {
     contracts: [
       {
         ...ensTokenContract,
+        functionName: 'delegates',
+        // @ts-expect-error: If the user is not connected, we'll redirect them
+        args: [address],
+      },
+      {
+        ...ensTokenContract,
         functionName: 'balanceOf',
         // @ts-expect-error: If the user is not connected, we'll redirect them
         args: [address],
@@ -52,9 +58,10 @@ export function Manage() {
     ],
   })
 
-  const [_balance, _allowance] = delegateInfo || []
+  const [_delegateFromTokenContract, _balance, _allowance] = delegateInfo || []
   const balance = _balance?.result
   const allowance = _allowance?.result
+  const delegateFromTokenContract = _delegateFromTokenContract?.result
 
   // Set the initial delegates
   useEffect(() => {
@@ -126,6 +133,10 @@ export function Manage() {
             isBalance={true}
             address={address}
             amount={formatNumber(balance, 'string')}
+            description={
+              delegateFromTokenContract &&
+              `Delegating to ${truncateAddress(delegateFromTokenContract)}`
+            }
           />
         </SmallCard>
 
