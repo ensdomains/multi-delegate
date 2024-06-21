@@ -1,10 +1,13 @@
 import { graphql } from '@ponder/core'
+import { cors } from 'hono/cors'
 import { erc20MultiDelegateContract } from 'shared/contracts'
 import { createPublicClient, isAddress } from 'viem'
 
 import { ponder } from '@/generated'
 
 import ponderConfig from '../../ponder.config'
+
+ponder.use('*', cors())
 
 ponder.use('/', graphql())
 
