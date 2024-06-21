@@ -89,19 +89,6 @@ export function Manage() {
 
     if (allocatedDelegates.length === 0) {
       alert('Please allocate some tokens to a delegate')
-    } else if (allocatedDelegates.length === 1) {
-      console.log('Delegating via the token contract')
-
-      alert(
-        'This is going to delegate all of your tokens since you only selected 1 delegate'
-      )
-
-      // If the user has 1 delegate selected, use the token contract directly
-      write.writeContract({
-        ...ensTokenContract,
-        functionName: 'delegate',
-        args: [allocatedDelegates[0][0]],
-      })
     } else {
       console.log('Delegating via the multiDelegate contract')
 
