@@ -10,6 +10,7 @@ export default {
             surface: '#EEF5FF',
           },
           grey: {
+            primary: '#9B9BA6',
             surface: '#F6F6F6',
           },
           yellow: {

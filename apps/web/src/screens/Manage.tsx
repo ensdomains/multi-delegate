@@ -1,4 +1,11 @@
-import { Button, Card, Heading, PlusSVG } from '@ensdomains/thorin'
+import {
+  AlertSVG,
+  Button,
+  Card,
+  Heading,
+  PlusSVG,
+  Typography,
+} from '@ensdomains/thorin'
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { ensTokenContract, erc20MultiDelegateContract } from 'shared/contracts'
@@ -93,8 +100,7 @@ export function Manage() {
       console.log('Delegating via the multiDelegate contract')
 
       if (allocatedDelegates.map((del) => del[0]).includes(address)) {
-        alert('You cannot delegate to yourself')
-        return
+        return alert('You cannot delegate to yourself')
       }
 
       // If the user has multiple delegates selected, use the multiDelegate contract
@@ -128,6 +134,13 @@ export function Manage() {
         </SmallCard>
 
         <SmallCard>
+          {delegatesArr.length === 0 && (
+            <div className="flex flex-col items-center gap-1 py-6 text-center">
+              <AlertSVG className="text-ens-grey-primary" />
+              <Typography color="grey">No delegates yet</Typography>
+            </div>
+          )}
+
           {delegatesArr.map(([address, amount], index) => (
             <div key={address}>
               <DelegateRow
