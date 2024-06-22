@@ -172,9 +172,9 @@ export function Manage() {
             if (!allowance || !balance) return <Spinner size="medium" />
 
             // TODO: Let the user allocate tokens from the allowance vs requiring full allowance
-            const hasFullAllowance = !(allowance < balance)
+            const hasFullAllowance = allowance >= balance
 
-            if (!hasFullAllowance && allocatedDelegates.length > 1) {
+            if (!hasFullAllowance) {
               return (
                 <Button
                   disabled={!balance}
