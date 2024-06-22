@@ -13,7 +13,7 @@ export default createConfig({
     MultiDelegate: {
       ...erc20MultiDelegateContract,
       network: 'mainnet',
-      startBlock: 19520101,
+      startBlock: erc20MultiDelegateContract.deployedBock,
     },
   },
 })

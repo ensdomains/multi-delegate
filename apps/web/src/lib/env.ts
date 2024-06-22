@@ -6,6 +6,5 @@ export const RPC_URL =
   import.meta.env.VITE_PUBLIC_RPC_URL ||
   'https://virtual.mainnet.rpc.tenderly.co/78d3d569-cb63-45a9-8b8c-9d152d90c3ed'
 
-export const PONDER_URL = new URL(
-  import.meta.env.VITE_PUBLIC_PONDER_URL || 'http://localhost:42069'
-).origin
+export const PONDER_URL =
+  (import.meta.env.VITE_PUBLIC_PONDER_URL as string) || undefined
