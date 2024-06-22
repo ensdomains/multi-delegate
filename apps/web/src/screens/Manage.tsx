@@ -4,6 +4,7 @@ import {
   Card,
   Heading,
   PlusSVG,
+  Spinner,
   Typography,
 } from '@ensdomains/thorin'
 import { useEffect, useState } from 'react'
@@ -168,8 +169,10 @@ export function Manage() {
 
         <ButtonWrapper>
           {(() => {
+            if (!allowance || !balance) return <Spinner size="medium" />
+
             // TODO: Let the user allocate tokens from the allowance vs requiring full allowance
-            const hasFullAllowance = !((allowance || 0n) < (balance || 0n))
+            const hasFullAllowance = !(allowance < balance)
 
             if (!hasFullAllowance && allocatedDelegates.length > 1) {
               return (
@@ -179,11 +182,7 @@ export function Manage() {
                     write.writeContract({
                       ...ensTokenContract,
                       functionName: 'approve',
-                      args: [
-                        erc20MultiDelegateContract.address,
-                        // @ts-expect-error: Button is disabled if there is no balance
-                        balance,
-                      ],
+                      args: [erc20MultiDelegateContract.address, balance],
                     })
                   }}
                 >
@@ -194,27 +193,28 @@ export function Manage() {
 
             return (
               <>
-                <Button
-                  colorStyle="blueSecondary"
-                  disabled={!multiDelegate.data}
-                  onClick={() => {
-                    write.writeContract({
-                      ...erc20MultiDelegateContract,
-                      functionName: 'delegateMulti',
-                      args: [
-                        multiDelegate.data!.map((delegate) =>
-                          BigInt(delegate.tokenId)
-                        ), // sources[]
-                        [], // targets[]
-                        multiDelegate.data!.map((delegate) =>
-                          BigInt(delegate.amount)
-                        ), // amounts[]
-                      ],
-                    })
-                  }}
-                >
-                  Reclaim Tokens
-                </Button>
+                {(multiDelegate.data?.length || 0) > 0 && (
+                  <Button
+                    colorStyle="blueSecondary"
+                    onClick={() => {
+                      write.writeContract({
+                        ...erc20MultiDelegateContract,
+                        functionName: 'delegateMulti',
+                        args: [
+                          multiDelegate.data!.map((delegate) =>
+                            BigInt(delegate.tokenId)
+                          ), // sources[]
+                          [], // targets[]
+                          multiDelegate.data!.map((delegate) =>
+                            BigInt(delegate.amount)
+                          ), // amounts[]
+                        ],
+                      })
+                    }}
+                  >
+                    Reclaim Tokens
+                  </Button>
+                )}
 
                 <Button
                   onClick={handleUpdate}
