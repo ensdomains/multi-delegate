@@ -1,4 +1,4 @@
-import { Card, Heading, Helper, Spinner, Typography } from '@ensdomains/thorin'
+import { Card, Heading, Helper, Spinner } from '@ensdomains/thorin'
 import { useParams } from 'react-router-dom'
 import { ensTokenContract } from 'shared/contracts'
 import { Address, isAddress } from 'viem'
@@ -64,12 +64,6 @@ export function SharedStrategy() {
       <Heading className="mb-4">{name}'s Strategy</Heading>
 
       <Card className="text-center">
-        <Typography asProp="p">
-          This only shows delegations via the multi-delegate contract. If
-          additional tokens are delegated directly from the token contract, they
-          will not be shown here.
-        </Typography>
-
         <InnerCard className="flex flex-wrap justify-center gap-2">
           <>
             {/* Delegation from token contract */}
