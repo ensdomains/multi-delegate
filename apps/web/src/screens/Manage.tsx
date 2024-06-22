@@ -135,9 +135,11 @@ export function Manage() {
 
         <SmallCard>
           {delegatesArr.length === 0 && (
-            <div className="flex flex-col items-center gap-1 py-6 text-center">
+            <div className="flex flex-col items-center gap-2 py-6 text-center">
               <AlertSVG className="text-ens-grey-primary" />
-              <Typography color="grey">No delegates yet</Typography>
+              <Typography color="grey">
+                Not using the Multi-Delegate contract yet
+              </Typography>
             </div>
           )}
 
