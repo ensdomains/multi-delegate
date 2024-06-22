@@ -90,6 +90,7 @@ export function Strategy() {
                 {/* Delegations from multi-delegate contract */}
                 {multiDelegate.data?.map((delegate) => (
                   <DelegatePill
+                    key={delegate.delegate}
                     address={delegate.delegate}
                     amount={BigInt(delegate.amount)}
                   />
