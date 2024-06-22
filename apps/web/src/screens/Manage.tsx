@@ -170,10 +170,11 @@ export function Manage() {
 
         <ButtonWrapper>
           {(() => {
-            // TODO: Let the user allocate tokens from the allowance vs requiring full allowance
-            const hasFullAllowance = (allowance || 0n) >= (balance || 0n)
+            const hasSufficientAllowance =
+              (allowance || 0n) >=
+              parseUnits(allocatedVotingPower.toString(), 18)
 
-            if (!hasFullAllowance) {
+            if (!hasSufficientAllowance) {
               return (
                 <Button
                   disabled={!balance}
@@ -222,6 +223,7 @@ export function Manage() {
                 <Button
                   onClick={handleUpdate}
                   disabled={
+                    !allocatedVotingPower ||
                     isNaN(allocatedVotingPower) ||
                     allocatedVotingPower > formatNumber(balance, 'number')
                   }
