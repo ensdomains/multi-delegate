@@ -21,20 +21,18 @@ ponder.get('/:address', async (c) => {
   }
 
   const delegates = (await Account.findUnique({ id: address }))?.delegates || []
+  const tokenIds = delegates.map((item) => BigInt(item))
 
   const balanceOf = await client.readContract({
     ...erc20MultiDelegateContract,
     functionName: 'balanceOfBatch',
-    args: [
-      delegates.map(() => address), // address (we use the map to match the length of the delegates array)
-      delegates.map((item) => BigInt(item)), // tokenId
-    ],
+    args: [new Array(tokenIds.length).fill(address), tokenIds],
   })
 
-  const data = delegates.map((delegate, index) => ({
-    delegate,
-    tokenId: BigInt(delegate).toString(),
-    amount: balanceOf[index]?.toString(),
+  const data = tokenIds.map((tokenId, index) => ({
+    delegate: delegates[index],
+    tokenId,
+    amount: balanceOf[index]!.toString(),
   }))
 
   // remove delegates with no balance
