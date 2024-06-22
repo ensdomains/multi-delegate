@@ -4,7 +4,6 @@ import {
   Card,
   Heading,
   PlusSVG,
-  Spinner,
   Typography,
 } from '@ensdomains/thorin'
 import { useEffect, useState } from 'react'
@@ -169,10 +168,8 @@ export function Manage() {
 
         <ButtonWrapper>
           {(() => {
-            if (!allowance || !balance) return <Spinner size="medium" />
-
             // TODO: Let the user allocate tokens from the allowance vs requiring full allowance
-            const hasFullAllowance = allowance >= balance
+            const hasFullAllowance = (allowance || 0n) >= (balance || 0n)
 
             if (!hasFullAllowance) {
               return (
@@ -182,7 +179,11 @@ export function Manage() {
                     write.writeContract({
                       ...ensTokenContract,
                       functionName: 'approve',
-                      args: [erc20MultiDelegateContract.address, balance],
+                      args: [
+                        erc20MultiDelegateContract.address,
+                        // @ts-expect-error: Button is disabled if there is no balance
+                        balance,
+                      ],
                     })
                   }}
                 >
