@@ -10,13 +10,13 @@ import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { ensTokenContract, erc20MultiDelegateContract } from 'shared/contracts'
 import { Address, formatUnits, parseUnits } from 'viem'
-import { useAccount, useReadContracts, useWriteContract } from 'wagmi'
+import { useAccount, useWriteContract } from 'wagmi'
 
 import { ButtonWrapper } from '../components/ButtonWrapper'
 import { DelegateRow } from '../components/DelegateRow'
 import { SearchModal } from '../components/SearchModal'
 import { SmallCard } from '../components/SmallCard'
-import { useDelegates } from '../hooks/useDelegates'
+import { useDelegationInfo } from '../hooks/useDelegationInfo'
 import { formatNumber, truncateAddress } from '../lib/utils'
 
 export type DelegateSelection = Map<Address, string>
@@ -25,7 +25,7 @@ export function Manage() {
   const { address } = useAccount()
   const write = useWriteContract()
   const navigate = useNavigate()
-  const multiDelegate = useDelegates(address)
+  const delegationInfo = useDelegationInfo(address)
   const [isModalOpen, setIsModalOpen] = useState(false)
 
   const [delegates, setDelegates] = useState<DelegateSelection>(new Map())
@@ -42,49 +42,23 @@ export function Manage() {
     ([, amount]) => Number(amount) > 0
   )
 
-  const { data: delegateInfo } = useReadContracts({
-    contracts: [
-      {
-        ...ensTokenContract,
-        functionName: 'delegates',
-        // @ts-expect-error: If the user is not connected, we'll redirect them
-        args: [address],
-      },
-      {
-        ...ensTokenContract,
-        functionName: 'balanceOf',
-        // @ts-expect-error: If the user is not connected, we'll redirect them
-        args: [address],
-      },
-      {
-        ...ensTokenContract,
-        functionName: 'allowance',
-        // @ts-expect-error: If the user is not connected, we'll redirect them
-        args: [address, erc20MultiDelegateContract.address],
-      },
-    ],
-  })
-
-  const [_delegateFromTokenContract, _balance, _allowance] = delegateInfo || []
-  const balance = _balance?.result
-  const allowance = _allowance?.result
-  const delegateFromTokenContract = _delegateFromTokenContract?.result
+  const { multiDelegates, delegateFromTokenContract, balance, allowance } =
+    delegationInfo.data ?? {}
 
   // Set the initial delegates
   useEffect(() => {
-    if (!multiDelegate.data) return
+    if (!multiDelegates) return
 
     // convert multiDelegate.data to a Map and set it as the initial delegates
     setDelegates(
       new Map(
-        multiDelegate.data.map((delegate) => [
+        multiDelegates?.map((delegate) => [
           delegate.delegate,
           formatUnits(BigInt(delegate.amount), 18),
         ])
       )
     )
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [multiDelegate.data])
+  }, [multiDelegates])
 
   // Redirect if the user is not connected or has 0 tokens to make error handling easier
   if (!address || balance === 0n) {
@@ -197,7 +171,7 @@ export function Manage() {
 
             return (
               <>
-                {(multiDelegate.data?.length || 0) > 0 && (
+                {(multiDelegates?.length || 0) > 0 && (
                   <Button
                     colorStyle="blueSecondary"
                     onClick={() => {
@@ -205,11 +179,11 @@ export function Manage() {
                         ...erc20MultiDelegateContract,
                         functionName: 'delegateMulti',
                         args: [
-                          multiDelegate.data!.map((delegate) =>
+                          multiDelegates!.map((delegate) =>
                             BigInt(delegate.tokenId)
                           ), // sources[]
                           [], // targets[]
-                          multiDelegate.data!.map((delegate) =>
+                          multiDelegates!.map((delegate) =>
                             BigInt(delegate.amount)
                           ), // amounts[]
                         ],

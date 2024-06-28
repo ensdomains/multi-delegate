@@ -9,40 +9,23 @@ import {
 } from '@ensdomains/thorin'
 import { useConnectModal } from '@rainbow-me/rainbowkit'
 import clsx from 'clsx'
-import { ensTokenContract } from 'shared/contracts'
-import { useAccount, useReadContracts } from 'wagmi'
+import { useAccount } from 'wagmi'
 
 import { ButtonWrapper } from '../components/ButtonWrapper'
 import { DelegatePill } from '../components/DelegatePill'
 import { InnerCard } from '../components/InnerCard'
-import { useDelegates } from '../hooks/useDelegates'
+import { useDelegationInfo } from '../hooks/useDelegationInfo'
 import { NULL } from '../lib/utils'
 
 export function Strategy() {
   const { address } = useAccount()
   const { openConnectModal } = useConnectModal()
-  const multiDelegate = useDelegates(address)
+  const delegationInfo = useDelegationInfo(address)
 
-  const { data: delegateInfo } = useReadContracts({
-    contracts: [
-      {
-        ...ensTokenContract,
-        functionName: 'delegates',
-        args: address ? [address] : undefined,
-      },
-      {
-        ...ensTokenContract,
-        functionName: 'balanceOf',
-        args: address ? [address] : undefined,
-      },
-    ],
-  })
+  const { multiDelegates, delegateFromTokenContract, balance } =
+    delegationInfo.data ?? {}
 
-  const [_delegateFromTokenContract, _balance] = delegateInfo || []
-  const balance = _balance?.result
-  const delegateFromTokenContract = _delegateFromTokenContract?.result
-
-  const isUsingMultiDelegate = !!multiDelegate.data
+  const isUsingMultiDelegate = !!multiDelegates
 
   return (
     <>
@@ -88,7 +71,7 @@ export function Strategy() {
                 )}
 
                 {/* Delegations from multi-delegate contract */}
-                {multiDelegate.data?.map((delegate) => (
+                {multiDelegates?.map((delegate) => (
                   <DelegatePill
                     key={delegate.delegate}
                     address={delegate.delegate}
