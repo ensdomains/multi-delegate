@@ -1,4 +1,4 @@
-import clsx from 'clsx'
+import { cn } from '../lib/utils'
 
 type Props = {
   children: React.ReactNode
@@ -8,7 +8,7 @@ type Props = {
 export function InnerCard({ children, className }: Props) {
   return (
     <div
-      className={clsx(
+      className={cn(
         'bg-ens-grey-surface rounded-lg p-4 text-center',
         className
       )}

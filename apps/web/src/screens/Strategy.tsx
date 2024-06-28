@@ -8,14 +8,13 @@ import {
   Typography,
 } from '@ensdomains/thorin'
 import { useConnectModal } from '@rainbow-me/rainbowkit'
-import clsx from 'clsx'
 import { useAccount } from 'wagmi'
 
 import { ButtonWrapper } from '../components/ButtonWrapper'
 import { DelegatePill } from '../components/DelegatePill'
 import { InnerCard } from '../components/InnerCard'
 import { useDelegationInfo } from '../hooks/useDelegationInfo'
-import { NULL } from '../lib/utils'
+import { NULL, cn } from '../lib/utils'
 
 export function Strategy() {
   const { address } = useAccount()
@@ -120,7 +119,7 @@ export function Strategy() {
                   href="/manage"
                   suffix={<RightArrowSVG />}
                   colorStyle={btnDisabled ? 'disabled' : 'bluePrimary'}
-                  className={clsx(btnDisabled && '!cursor-not-allowed')}
+                  className={cn(btnDisabled && '!cursor-not-allowed')}
                 >
                   Manage strategy
                 </Button>

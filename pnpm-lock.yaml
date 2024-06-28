@@ -55,6 +55,7 @@ importers:
       react-transition-state: 1.1.5
       shared: workspace:*
       styled-components: ^6.1.8
+      tailwind-merge: ^2.3.0
       tailwindcss: ^3.4.1
       typescript: ^5.2.2
       usehooks-ts: ^3.1.0
@@ -72,6 +73,7 @@ importers:
       react-transition-state: 1.1.5_nnrd3gsncyragczmpvfhocinkq
       shared: link:../../packages/shared
       styled-components: 6.1.11_nnrd3gsncyragczmpvfhocinkq
+      tailwind-merge: 2.3.0
       usehooks-ts: 3.1.0_react@18.3.1
       viem: 2.15.1_typescript@5.4.5
       wagmi: 2.10.3_ei3y3gud3cx36lx6hvjy4jyx3e
@@ -6056,6 +6058,12 @@ packages:
   /system-architecture/0.1.0:
     resolution: {integrity: sha512-ulAk51I9UVUyJgxlv9M6lFot2WP3e7t8Kz9+IS6D4rVba1tR9kON+Ey69f+1R4Q8cd45Lod6a4IcJIxnzGc/zA==}
     engines: {node: '>=18'}
+    dev: false
+
+  /tailwind-merge/2.3.0:
+    resolution: {integrity: sha512-vkYrLpIP+lgR0tQCG6AP7zZXCTLc1Lnv/CCRT3BqJ9CZ3ui2++GPaGb1x/ILsINIMSYqqvrpqjUFsMNLlW99EA==}
+    dependencies:
+      '@babel/runtime': 7.24.7
     dev: false
 
   /tailwindcss/3.4.4:
