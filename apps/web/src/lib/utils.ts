@@ -1,4 +1,10 @@
+import { type ClassValue, clsx } from 'clsx'
+import { twMerge } from 'tailwind-merge'
 import { formatUnits } from 'viem/utils'
+
+export function cn(...inputs: ClassValue[]) {
+  return twMerge(clsx(inputs))
+}
 
 export const NULL = '0x0000000000000000000000000000000000000000'
 

@@ -1,11 +1,10 @@
 import { Input, Typography } from '@ensdomains/thorin'
-import clsx from 'clsx'
 import { Address } from 'viem'
 import { useEnsAvatar, useEnsName } from 'wagmi'
 
 import profileIcon from '../assets/profileIcon.svg'
 import tokenIcon from '../assets/tokenIcon.svg'
-import { NULL, truncateAddress } from '../lib/utils'
+import { NULL, cn, truncateAddress } from '../lib/utils'
 import { DelegateSelection } from '../screens/Manage'
 
 type Props = {
@@ -43,7 +42,7 @@ export function DelegateRow({
   if (!address) return null
 
   return (
-    <div className={clsx('flex w-full', className)}>
+    <div className={cn('flex w-full', className)}>
       <div className="flex w-full items-center gap-2">
         <img
           className="rounded-full"

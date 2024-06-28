@@ -1,7 +1,7 @@
 import { Card } from '@ensdomains/thorin'
-import clsx from 'clsx'
 
 import { Divider as BaseDivider } from '../components/Divider'
+import { cn } from '../lib/utils'
 
 type Props = {
   children: React.ReactNode
@@ -9,7 +9,7 @@ type Props = {
 }
 
 function Parent({ children, className }: Props) {
-  return <Card className={clsx('!rounded-lg !p-4', className)}>{children}</Card>
+  return <Card className={cn('!rounded-lg !p-4', className)}>{children}</Card>
 }
 
 function Divider() {

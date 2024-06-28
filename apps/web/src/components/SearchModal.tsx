@@ -8,11 +8,11 @@ import {
   Spinner,
   Typography,
 } from '@ensdomains/thorin'
-import clsx from 'clsx'
 import { useDebounceValue } from 'usehooks-ts'
 import { Address } from 'viem'
 
 import { useDelegateSearch } from '../hooks/useDelegateSearch'
+import { cn } from '../lib/utils'
 import { DelegateSelection } from '../screens/Manage'
 import { Divider } from './Divider'
 import { SearchResult } from './SearchResult'
@@ -67,7 +67,7 @@ export function SearchModal({
       />
 
       <div
-        className={clsx(
+        className={cn(
           '-my-3 flex h-48 w-[38rem] max-w-full flex-col overflow-y-scroll sm:w-[30rem]',
           (search.data?.length === 0 || search.isLoading || search.isError) &&
             'items-center justify-center'
