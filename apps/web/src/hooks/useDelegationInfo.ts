@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query'
-import { erc20MultiDelegateContract } from 'shared/contracts'
+import { ensTokenContract, erc20MultiDelegateContract } from 'shared/contracts'
 import { Address, PublicClient, isAddress, toHex } from 'viem'
 import { usePublicClient } from 'wagmi'
 
@@ -13,19 +13,46 @@ type DelegateApiResponse = {
   amount: string
 }
 
-export function useDelegates(address?: Address | null) {
+export function useDelegationInfo(address?: Address | null) {
   const viemClient = usePublicClient({ config: wagmiConfig })
 
-  return useQuery<DelegateApiResponse[]>({
+  return useQuery({
     queryKey: ['delegates', address],
     queryFn: async () => {
-      if (!address || !isAddress(address)) return
-
-      if (PONDER_URL) {
-        return getDelegatesFromIndexer(address)
+      if (!address || !isAddress(address)) {
+        return {}
       }
 
-      return getDelegatesFromEventLogs(viemClient, address)
+      const multiDelegates = PONDER_URL
+        ? await getDelegatesFromIndexer(address)
+        : await getDelegatesFromEventLogs(viemClient, address)
+
+      const [_delegateFromTokenContract, _balance, _allowance] =
+        await viemClient.multicall({
+          contracts: [
+            {
+              ...ensTokenContract,
+              functionName: 'delegates',
+              args: [address],
+            },
+            {
+              ...ensTokenContract,
+              functionName: 'balanceOf',
+              args: [address],
+            },
+            {
+              ...ensTokenContract,
+              functionName: 'allowance',
+              args: [address, erc20MultiDelegateContract.address],
+            },
+          ],
+        })
+
+      const delegateFromTokenContract = _delegateFromTokenContract?.result
+      const balance = _balance?.result
+      const allowance = _allowance?.result
+
+      return { multiDelegates, delegateFromTokenContract, balance, allowance }
     },
   })
 }
@@ -39,7 +66,7 @@ async function getDelegatesFromIndexer(address: Address) {
     throw new Error(data.error)
   }
 
-  return data
+  return data as DelegateApiResponse[]
 }
 
 // This is better in some ways because it reads directly from an RPC, but

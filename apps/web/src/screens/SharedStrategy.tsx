@@ -1,12 +1,11 @@
 import { Card, Heading, Helper, Spinner } from '@ensdomains/thorin'
 import { useParams } from 'react-router-dom'
-import { ensTokenContract } from 'shared/contracts'
 import { Address, isAddress } from 'viem'
-import { useEnsAddress, useEnsName, useReadContracts } from 'wagmi'
+import { useEnsAddress, useEnsName } from 'wagmi'
 
 import { DelegatePill } from '../components/DelegatePill'
 import { InnerCard } from '../components/InnerCard'
-import { useDelegates } from '../hooks/useDelegates'
+import { useDelegationInfo } from '../hooks/useDelegationInfo'
 import { truncateAddress } from '../lib/utils'
 
 /* TODO: Maybe break some of this file into a separate component since it shares quite a bit of code with <Strategy /> */
@@ -30,26 +29,10 @@ export function SharedStrategy() {
     ? addressOrName
     : ensName.data || truncateAddress(addressOrName)
 
-  const multiDelegate = useDelegates(address)
+  const delegationInfo = useDelegationInfo(address)
 
-  const { data: delegateInfo } = useReadContracts({
-    contracts: [
-      {
-        ...ensTokenContract,
-        functionName: 'delegates',
-        args: address ? [address] : undefined,
-      },
-      {
-        ...ensTokenContract,
-        functionName: 'balanceOf',
-        args: address ? [address] : undefined,
-      },
-    ],
-  })
-
-  const [_delegateFromTokenContract, _balance] = delegateInfo || []
-  const balance = _balance?.result
-  const delegateFromTokenContract = _delegateFromTokenContract?.result
+  const { multiDelegates, delegateFromTokenContract, balance } =
+    delegationInfo.data ?? {}
 
   if (ensName.isLoading || ensAddress.isLoading) {
     return <Spinner size="medium" />
@@ -76,7 +59,7 @@ export function SharedStrategy() {
             )}
 
             {/* Delegations from multi-delegate contract */}
-            {multiDelegate.data?.map((delegate) => (
+            {multiDelegates?.map((delegate) => (
               <DelegatePill
                 address={delegate.delegate}
                 amount={BigInt(delegate.amount)}
