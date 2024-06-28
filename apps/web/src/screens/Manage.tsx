@@ -4,16 +4,22 @@ import {
   Card,
   Heading,
   PlusSVG,
+  Spinner,
   Typography,
 } from '@ensdomains/thorin'
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { ensTokenContract, erc20MultiDelegateContract } from 'shared/contracts'
 import { Address, formatUnits, parseUnits } from 'viem'
-import { useAccount, useWriteContract } from 'wagmi'
+import {
+  useAccount,
+  useWaitForTransactionReceipt,
+  useWriteContract,
+} from 'wagmi'
 
 import { ButtonWrapper } from '../components/ButtonWrapper'
 import { DelegateRow } from '../components/DelegateRow'
+import { Helper } from '../components/Helper'
 import { SearchModal } from '../components/SearchModal'
 import { SmallCard } from '../components/SmallCard'
 import { useDelegationInfo } from '../hooks/useDelegationInfo'
@@ -24,6 +30,8 @@ export type DelegateSelection = Map<Address, string>
 export function Manage() {
   const { address } = useAccount()
   const write = useWriteContract()
+  const receipt = useWaitForTransactionReceipt({ hash: write.data })
+
   const navigate = useNavigate()
   const delegationInfo = useDelegationInfo(address)
   const [isModalOpen, setIsModalOpen] = useState(false)
@@ -59,6 +67,14 @@ export function Manage() {
       )
     )
   }, [multiDelegates])
+
+  // Refetch the delegateInfo 1s after a transaction (to let the indexer catch up)
+  useEffect(() => {
+    if (receipt.status) {
+      setTimeout(() => delegationInfo.refetch(), 1000)
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [receipt.status])
 
   // Redirect if the user is not connected or has 0 tokens to make error handling easier
   if (!address || balance === 0n) {
@@ -141,6 +157,34 @@ export function Manage() {
         <div className="py-1">
           <Card.Divider />
         </div>
+
+        {receipt.isSuccess && (
+          <Helper type="success" className="mx-auto">
+            Transaction success!
+          </Helper>
+        )}
+
+        {receipt.isLoading && (
+          <Spinner size="medium" color="blue" className="mx-auto" />
+        )}
+
+        {receipt.isError && (
+          <Helper type="error">
+            <div>
+              Transaction failed. It will likely work if you try again a few
+              times. Tenderly sends a different gas estimate to the wallet each
+              time for some reason.{' '}
+              <a
+                href="https://dashboard.tenderly.co/explorer/vnet/78d3d569-cb63-45a9-8b8c-9d152d90c3ed/transactions"
+                target="_blank"
+                className="text-ens-red-primary font-bold underline"
+              >
+                See more here
+              </a>
+              .
+            </div>
+          </Helper>
+        )}
 
         <ButtonWrapper>
           {(() => {

@@ -22,6 +22,10 @@ export default {
           additional: {
             border: '#E8E8E8',
           },
+          green: {
+            primary: '#199C75',
+            surface: '#E7F4EF',
+          },
         },
       },
     },
