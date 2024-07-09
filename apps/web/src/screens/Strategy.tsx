@@ -47,7 +47,7 @@ export function Strategy() {
             )
           }
 
-          if (balance === 0n || multiDelegates?.length === 0) {
+          if (balance === 0n && multiDelegates?.length === 0) {
             return (
               <Helper type="warning">
                 <Typography asProp="p">
