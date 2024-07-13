@@ -14,7 +14,7 @@ import { ButtonWrapper } from '../components/ButtonWrapper'
 import { DelegatePill } from '../components/DelegatePill'
 import { InnerCard } from '../components/InnerCard'
 import { useDelegationInfo } from '../hooks/useDelegationInfo'
-import { NULL, cn } from '../lib/utils'
+import { NULL, checkHasBalance, cn } from '../lib/utils'
 
 export function Strategy() {
   const { address } = useAccount()
@@ -47,7 +47,7 @@ export function Strategy() {
             )
           }
 
-          if (balance === 0n && multiDelegates?.length === 0) {
+          if (!checkHasBalance({ balance, multiDelegates })) {
             return (
               <Helper type="warning">
                 <Typography asProp="p">
@@ -63,7 +63,7 @@ export function Strategy() {
                 {/* Delegation from token contract */}
                 {balance && (
                   <DelegatePill
-                    address={delegateFromTokenContract}
+                    address={delegateFromTokenContract ?? undefined}
                     amount={balance}
                     tooltip="From the token contract"
                   />
@@ -92,7 +92,7 @@ export function Strategy() {
               )
             }
 
-            const btnDisabled = balance === 0n
+            const btnDisabled = balance === 0n && multiDelegates?.length === 0
             const isUndelegated =
               !isUsingMultiDelegate && delegateFromTokenContract === NULL
 

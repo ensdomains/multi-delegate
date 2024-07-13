@@ -42,7 +42,7 @@ export function SearchModal({
     setDelegates(
       new Map([
         ...delegates,
-        [address, '0'], // Start with 0 as the default amount
+        [address, { preExistingBalance: 0n, newBalance: 0n }], // Start with 0 as the default amount
       ])
     )
 

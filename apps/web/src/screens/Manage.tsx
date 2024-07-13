@@ -10,7 +10,7 @@ import {
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { ensTokenContract, erc20MultiDelegateContract } from 'shared/contracts'
-import { Address, formatUnits, parseUnits } from 'viem'
+import { Address } from 'viem'
 import {
   useAccount,
   useWaitForTransactionReceipt,
@@ -23,9 +23,12 @@ import { Helper } from '../components/Helper'
 import { SearchModal } from '../components/SearchModal'
 import { SmallCard } from '../components/SmallCard'
 import { useDelegationInfo } from '../hooks/useDelegationInfo'
-import { formatNumber, truncateAddress } from '../lib/utils'
+import { checkHasBalance, truncateAddress } from '../lib/utils'
 
-export type DelegateSelection = Map<Address, string>
+export type DelegateSelection = Map<
+  Address,
+  { preExistingBalance: bigint | null; newBalance: bigint }
+>
 
 export function Manage() {
   const { address } = useAccount()
@@ -41,17 +44,52 @@ export function Manage() {
 
   // Count the total voting power of the selected delegates
   const allocatedVotingPower = delegatesArr.reduce(
-    (acc, [, amount]) => acc + Number(amount),
-    0
+    (acc, [, { newBalance }]) => acc + newBalance,
+    0n
+  )
+  const alreadyAllocatedVotingPower = delegatesArr.reduce(
+    (acc, [, { preExistingBalance }]) => acc + (preExistingBalance || 0n),
+    0n
   )
 
   // Count the number of delegates with >0 amount
   const allocatedDelegates = delegatesArr.filter(
-    ([, amount]) => Number(amount) > 0
+    ([, { newBalance }]) => newBalance > 0n
   )
 
   const { multiDelegates, delegateFromTokenContract, balance, allowance } =
     delegationInfo.data ?? {}
+  const hasPreExistingDelegates = !!multiDelegates?.length
+  const toBeAllocated =
+    (balance || 0n) - (allocatedVotingPower - alreadyAllocatedVotingPower)
+  const reassignedTokens = delegatesArr.reduce(
+    (acc, [, { preExistingBalance, newBalance }]) => {
+      return acc + (newBalance - (preExistingBalance || 0n))
+    },
+    0n
+  )
+  const requiredRebalanceAllowance = reassignedTokens - (allowance || 0n)
+
+  const selfDelegate = [
+    address!,
+    { preExistingBalance: balance || 0n, newBalance: toBeAllocated },
+  ] as const
+  const changingDelegates = [...delegatesArr, selfDelegate]
+    .filter(
+      ([, { preExistingBalance, newBalance }]) =>
+        preExistingBalance !== newBalance
+    )
+    .map(
+      ([address, { preExistingBalance, newBalance }]) =>
+        [
+          address,
+          {
+            preExistingBalance,
+            newBalance,
+            change: newBalance - (preExistingBalance || 0n),
+          },
+        ] as const
+    )
 
   // Set the initial delegates
   useEffect(() => {
@@ -60,10 +98,17 @@ export function Manage() {
     // convert multiDelegate.data to a Map and set it as the initial delegates
     setDelegates(
       new Map(
-        multiDelegates?.map((delegate) => [
-          delegate.delegate,
-          formatUnits(BigInt(delegate.amount), 18),
-        ])
+        multiDelegates?.map(
+          (delegate) =>
+            [
+              delegate.delegate,
+              {
+                preExistingBalance: BigInt(delegate.amount),
+                newBalance: BigInt(delegate.amount),
+              },
+              // formatUnits(BigInt(delegate.amount), 18),
+            ] as const
+        )
       )
     )
   }, [multiDelegates])
@@ -77,7 +122,7 @@ export function Manage() {
   }, [receipt.status])
 
   // Redirect if the user is not connected or has 0 tokens to make error handling easier
-  if (!address || balance === 0n) {
+  if (!address || !checkHasBalance({ balance, multiDelegates })) {
     navigate('/strategy')
   }
 
@@ -93,16 +138,183 @@ export function Manage() {
         return alert('You cannot delegate to yourself')
       }
 
-      // If the user has multiple delegates selected, use the multiDelegate contract
-      write.writeContract({
-        ...erc20MultiDelegateContract,
-        functionName: 'delegateMulti',
-        args: [
-          [], // sources[]
-          allocatedDelegates.map((del) => BigInt(del[0])), // targets[]
-          allocatedDelegates.map((del) => parseUnits(del[1], 18)), // amounts[]
-        ],
+      console.log({
+        changingDelegates,
       })
+
+      const positiveChangingDelegates = changingDelegates
+        .slice()
+        .filter(([, { change }]) => change > 0n)
+        .sort(([, { change: a }], [, { change: b }]) => Number(b - a))
+        .map(([address, { change }]) => [address, change] as [Address, bigint])
+      const negativeChangingDelegates = changingDelegates
+        .slice()
+        .filter(([, { change }]) => change < 0n)
+        .sort(([, { change: a }], [, { change: b }]) => Number(a - b))
+        .map(
+          ([address, { change }]) =>
+            [address, change * -1n] as [Address, bigint]
+        )
+      const removeMatchingNegativeDelegate = ([
+        referenceAddress,
+        referenceChange,
+      ]: [Address, bigint]) => {
+        const index = negativeChangingDelegates.findIndex(
+          ([address, change]) =>
+            address === referenceAddress && change === referenceChange
+        )
+        console.log('Removing neg for index', index)
+        if (index !== -1) negativeChangingDelegates.splice(index, 1)
+      }
+
+      let sources: Address[] = []
+      let targets: Address[] = []
+      const amounts: bigint[] = []
+
+      const checkForWithTargetTransactions = (txs: number) => {
+        console.log('Checking for txs', txs)
+        for (const [
+          positiveAddress,
+          positiveChange,
+        ] of positiveChangingDelegates) {
+          const negativeConsumed: [Address, bigint, partial: boolean][] = []
+          let remainingChange = positiveChange
+          let i = 0
+
+          while (i < negativeChangingDelegates.length) {
+            if (i > txs) break
+            const negativeDelegate = negativeChangingDelegates[i]
+            const [negativeDelegateAddress, negativeChange] = negativeDelegate
+            if (
+              remainingChange > negativeChange ||
+              remainingChange === negativeChange
+            ) {
+              console.log({ remainingChange, negativeChange })
+              negativeConsumed.push([...negativeChangingDelegates[i], false])
+              remainingChange = remainingChange - negativeChange
+              console.log('Remaining change after', remainingChange)
+              i++
+              if (remainingChange === 0n) break
+              else continue
+            }
+
+            negativeConsumed.push([
+              negativeDelegateAddress,
+              remainingChange,
+              true,
+            ])
+            negativeDelegate[1] = negativeChange - remainingChange
+            remainingChange = 0n
+            console.log('Using partial')
+            console.log('Remaining partial', negativeDelegate)
+            break
+          }
+
+          if (remainingChange !== 0n) continue
+
+          for (const [
+            negativeAddress,
+            negativeChange,
+            partial,
+          ] of negativeConsumed) {
+            sources.push(negativeAddress)
+            targets.push(positiveAddress)
+            amounts.push(negativeChange)
+            if (!partial)
+              removeMatchingNegativeDelegate([negativeAddress, negativeChange])
+          }
+          positiveChangingDelegates.splice(
+            positiveChangingDelegates.findIndex(
+              ([address, change]) =>
+                address === positiveAddress && change === positiveChange
+            ),
+            1
+          )
+        }
+      }
+
+      for (let i = 1; i < 10; i++) {
+        checkForWithTargetTransactions(i)
+        if (!positiveChangingDelegates.length) break
+      }
+
+      if (positiveChangingDelegates.length)
+        checkForWithTargetTransactions(Infinity)
+      console.log({ sources, targets, amounts })
+      if (positiveChangingDelegates.length)
+        throw new Error("couldn't get transfers")
+
+      console.log('123 TEST 123!!!!\n\n\n')
+
+      let hasOwnSource = false
+      let hasOwnTarget = false
+
+      const allReferences = amounts
+        .map((a, i) => {
+          let source: Address | undefined = sources[i]
+          if (source === address) {
+            hasOwnSource = true
+            source = undefined
+          }
+          let target: Address | undefined = targets[i]
+          if (target === address) {
+            hasOwnTarget = true
+            target = undefined
+          }
+
+          return {
+            source,
+            target,
+            amount: a,
+          }
+        })
+        .sort((a, b) => {
+          if (a.target === undefined || a.source === undefined) return 1
+          if (b.target === undefined || b.source === undefined) return -1
+          return 0
+        })
+
+      sources = []
+      targets = []
+
+      for (let i = 0; i < allReferences.length; i++) {
+        const reference = allReferences[i]
+        if (reference.source) sources[i] = reference.source
+        if (reference.target) targets[i] = reference.target
+        amounts[i] = reference.amount
+      }
+
+      console.log({
+        sources: sources.slice(),
+        targets: targets.slice(),
+        amounts: amounts.slice(),
+      })
+
+      if (hasOwnSource && hasOwnTarget) {
+        // should be unreachable but idk
+        throw new Error('unreachable??')
+      }
+
+      console.log({
+        sources,
+        targets,
+        amounts,
+      })
+
+      // If the user has multiple delegates selected, use the multiDelegate contract
+      write
+        .writeContractAsync({
+          ...erc20MultiDelegateContract,
+          functionName: 'delegateMulti',
+          args: [
+            sources.map((address) => BigInt(address)), // sources[]
+            targets.map((address) => BigInt(address)), // targets[]
+            amounts, // amounts[]
+          ],
+        })
+        .catch((e) => {
+          console.error(e)
+        })
     }
   }
 
@@ -115,10 +327,13 @@ export function Manage() {
           <DelegateRow
             isBalance={true}
             address={address}
-            amount={formatNumber(balance, 'string')}
+            newBalance={toBeAllocated}
+            preExistingBalance={balance || 0n}
+            hasPreExistingDelegates={hasPreExistingDelegates}
             description={
-              delegateFromTokenContract &&
-              `Delegating to ${truncateAddress(delegateFromTokenContract)}`
+              delegateFromTokenContract
+                ? `Delegating to ${truncateAddress(delegateFromTokenContract)}`
+                : undefined
             }
           />
         </SmallCard>
@@ -133,20 +348,30 @@ export function Manage() {
             </div>
           )}
 
-          {delegatesArr.map(([address, amount], index) => (
-            <div key={address}>
-              <DelegateRow
-                address={address}
-                amount={amount}
-                setDelegates={setDelegates}
-                className="pb-3 last:pb-0"
-              />
+          {delegatesArr.map(
+            ([address, { preExistingBalance, newBalance }], index) => (
+              <div key={address}>
+                <DelegateRow
+                  address={address}
+                  preExistingBalance={preExistingBalance}
+                  newBalance={newBalance}
+                  hasPreExistingDelegates={hasPreExistingDelegates}
+                  setDelegates={setDelegates}
+                  className="pb-3 last:pb-0"
+                />
 
-              {/* If its not the last delegate, add a divider */}
-              {index !== delegatesArr.length - 1 && <SmallCard.Divider />}
-            </div>
-          ))}
+                {/* If its not the last delegate, add a divider */}
+                {index !== delegatesArr.length - 1 && <SmallCard.Divider />}
+              </div>
+            )
+          )}
         </SmallCard>
+
+        {toBeAllocated < 0n && (
+          <Helper alignment="horizontal" type="error">
+            Not enough $ENS
+          </Helper>
+        )}
 
         <ButtonWrapper>
           <Button prefix={<PlusSVG />} onClick={() => setIsModalOpen(true)}>
@@ -189,21 +414,23 @@ export function Manage() {
         <ButtonWrapper>
           {(() => {
             const hasSufficientAllowance =
-              (allowance || 0n) >=
-              parseUnits(allocatedVotingPower.toString(), 18)
+              typeof allowance === 'bigint' &&
+              (requiredRebalanceAllowance <= 0n ||
+                allowance >= requiredRebalanceAllowance)
+
+            console.log(hasSufficientAllowance)
 
             if (!hasSufficientAllowance) {
               return (
                 <Button
-                  disabled={!balance}
+                  disabled={!requiredRebalanceAllowance}
                   onClick={() => {
                     write.writeContract({
                       ...ensTokenContract,
                       functionName: 'approve',
                       args: [
                         erc20MultiDelegateContract.address,
-                        // @ts-expect-error: Button is disabled if there is no balance
-                        balance,
+                        requiredRebalanceAllowance,
                       ],
                     })
                   }}
@@ -240,11 +467,7 @@ export function Manage() {
 
                 <Button
                   onClick={handleUpdate}
-                  disabled={
-                    !allocatedVotingPower ||
-                    isNaN(allocatedVotingPower) ||
-                    allocatedVotingPower > formatNumber(balance, 'number')
-                  }
+                  disabled={!allocatedVotingPower || toBeAllocated < 0n}
                 >
                   Update Strategy
                 </Button>
