@@ -1,13 +1,13 @@
 import { useQuery } from '@tanstack/react-query'
 import { ensTokenContract, erc20MultiDelegateContract } from 'shared/contracts'
-import { Address, PublicClient, isAddress, toHex } from 'viem'
+import { Address, PublicClient, isAddress, toHex, zeroAddress } from 'viem'
 import { usePublicClient } from 'wagmi'
 
 import { PONDER_URL } from '../lib/env'
 import { wagmiConfig } from '../lib/web3'
 
 // TODO: this should probably be specified in the `indexer` package and imported here
-type DelegateApiResponse = {
+export type DelegateApiResponse = {
   delegate: Address
   tokenId: string
   amount: string
@@ -48,7 +48,12 @@ export function useDelegationInfo(address?: Address | null) {
           ],
         })
 
-      const delegateFromTokenContract = _delegateFromTokenContract?.result
+      const delegateFromTokenContractWithEmpty =
+        _delegateFromTokenContract?.result
+      const delegateFromTokenContract =
+        delegateFromTokenContractWithEmpty === zeroAddress
+          ? null
+          : delegateFromTokenContractWithEmpty
       const balance = _balance?.result
       const allowance = _allowance?.result
 

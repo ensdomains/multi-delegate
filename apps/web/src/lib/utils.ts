@@ -2,6 +2,8 @@ import { type ClassValue, clsx } from 'clsx'
 import { twMerge } from 'tailwind-merge'
 import { formatUnits } from 'viem/utils'
 
+import type { DelegateApiResponse } from '../hooks/useDelegationInfo'
+
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
 }
@@ -26,4 +28,14 @@ export function formatNumber(
   }).format(Number(formatUnits(amount || 0n, 18)))
 
   return returnType === 'number' ? Number(data) : data
+}
+
+export const checkHasBalance = ({
+  balance,
+  multiDelegates,
+}: {
+  balance: bigint | undefined
+  multiDelegates: DelegateApiResponse[] | undefined
+}) => {
+  return balance !== 0n || multiDelegates?.length !== 0
 }
