@@ -26,7 +26,7 @@ export function Home() {
       <GradientTitle>ENS Delegation Manager</GradientTitle>
 
       <Typography fontVariant="headingFour">
-        Participate in the ENS DAO by delegating your $$ENS.
+        Participate in the ENS DAO by delegating your $ENS.
       </Typography>
 
       <Typography>
