@@ -1,19 +1,21 @@
 import { Helper, Profile, Typography } from '@ensdomains/thorin'
 import { useConnectModal } from '@rainbow-me/rainbowkit'
 import { Link } from 'react-router-dom'
-import { useAccount, useDisconnect } from 'wagmi'
+import { useAccount, useDisconnect, useEnsAvatar, useEnsName } from 'wagmi'
 
 import logo from '../assets/logo.svg'
 import profileIcon from '../assets/profileIcon.svg'
 
 export function Nav() {
   const { address } = useAccount()
+  const { data: ensName } = useEnsName({ address })
+  const { data: ensAvatar } = useEnsAvatar({ name: ensName || undefined })
   const { openConnectModal } = useConnectModal()
   const { disconnect } = useDisconnect()
 
   return (
-    <>
-      <Helper type="warning" alignment="horizontal">
+    <div>
+      <Helper type="warning" alignment="horizontal" className="mb-4">
         Use this JSON RPC in your wallet:
         https://virtual.mainnet.rpc.tenderly.co/78d3d569-cb63-45a9-8b8c-9d152d90c3ed
       </Helper>
@@ -42,6 +44,8 @@ export function Nav() {
           <Profile
             size="medium"
             address={address}
+            ensName={ensName || undefined}
+            avatar={ensAvatar || undefined}
             onClick={openConnectModal}
             dropdownItems={[
               {
@@ -59,6 +63,6 @@ export function Nav() {
           />
         )}
       </nav>
-    </>
+    </div>
   )
 }

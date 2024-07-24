@@ -1,8 +1,8 @@
 import { mq } from '@ensdomains/thorin'
 import styled, { css } from 'styled-components'
 
-export const Layout = styled.div(
-  ({ theme }) => css`
+export const Layout = styled.div<{ pathname: string }>(
+  ({ theme, pathname }) => css`
     display: flex;
     flex-direction: column;
 
@@ -13,6 +13,11 @@ export const Layout = styled.div(
     min-height: 100svh;
     gap: ${theme.space['8']};
     padding: ${theme.space['4']};
+
+    ${pathname === '/' &&
+    css`
+      justify-content: space-between;
+    `}
 
     ${mq.sm.min(css`
       padding: ${theme.space['8']};

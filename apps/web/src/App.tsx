@@ -1,4 +1,4 @@
-import { Route, Routes } from 'react-router-dom'
+import { Route, Routes, useLocation } from 'react-router-dom'
 
 import { Layout } from './components/Layout'
 import { Nav } from './components/Nav'
@@ -9,8 +9,10 @@ import { Strategy } from './screens/Strategy'
 import './style.css'
 
 function App() {
+  const pathname = useLocation().pathname
+
   return (
-    <Layout>
+    <Layout pathname={pathname}>
       <Nav />
 
       <main>
@@ -21,6 +23,8 @@ function App() {
           <Route path="/manage" element={<Manage />} />
         </Routes>
       </main>
+
+      <footer />
     </Layout>
   )
 }
