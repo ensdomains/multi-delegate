@@ -5,10 +5,13 @@ import {
   Heading,
   Helper,
   RightArrowSVG,
+  Skeleton,
+  Toast,
   Typography,
 } from '@ensdomains/thorin'
 import { useConnectModal } from '@rainbow-me/rainbowkit'
-import { useAccount } from 'wagmi'
+import { useState } from 'react'
+import { useAccount, useEnsName } from 'wagmi'
 
 import { ButtonWrapper } from '../components/ButtonWrapper'
 import { DelegatePill } from '../components/DelegatePill'
@@ -18,8 +21,13 @@ import { NULL, checkHasBalance, cn } from '../lib/utils'
 
 export function Strategy() {
   const { address } = useAccount()
+  const { data: ensName } = useEnsName({ address })
   const { openConnectModal } = useConnectModal()
   const delegationInfo = useDelegationInfo(address)
+
+  const [toast, setToast] = useState<{ title?: string; description?: string }>(
+    {}
+  )
 
   const { multiDelegates, delegateFromTokenContract, balance } =
     delegationInfo.data ?? {}
@@ -43,6 +51,18 @@ export function Strategy() {
                 <Typography asProp="p">
                   Connect your wallet to see your delegation strategy.
                 </Typography>
+              </InnerCard>
+            )
+          }
+
+          if (delegationInfo.isLoading) {
+            return (
+              <InnerCard className="flex justify-center">
+                <div className="overflow-hidden rounded-full">
+                  <Skeleton loading>
+                    <DelegatePill address="0x00000000" amount={1000n} />
+                  </Skeleton>
+                </div>
               </InnerCard>
             )
           }
@@ -104,10 +124,13 @@ export function Strategy() {
                     colorStyle="blueSecondary"
                     onClick={async () => {
                       await navigator.clipboard.writeText(
-                        `${window.location.origin}/strategy/${address}`
+                        `${window.location.origin}/strategy/${ensName || address}`
                       )
 
-                      alert('Copied to clipboard')
+                      setToast({
+                        title: 'Link copied',
+                        description: 'Your strategy link has been copied.',
+                      })
                     }}
                   >
                     Share strategy
@@ -128,6 +151,14 @@ export function Strategy() {
           })()}
         </ButtonWrapper>
       </Card>
+
+      <Toast
+        title="Copy successful"
+        description="The link to your strategy has been copied."
+        open={!!toast.title}
+        msToShow={5000}
+        onClose={() => setToast({})}
+      />
     </>
   )
 }
