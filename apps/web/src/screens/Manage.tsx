@@ -13,6 +13,7 @@ import { ensTokenContract, erc20MultiDelegateContract } from 'shared/contracts'
 import { Address } from 'viem'
 import {
   useAccount,
+  useEnsName,
   useWaitForTransactionReceipt,
   useWriteContract,
 } from 'wagmi'
@@ -69,6 +70,10 @@ export function Manage() {
     0n
   )
   const requiredRebalanceAllowance = reassignedTokens - (allowance || 0n)
+
+  const { data: delegateFromTokenContractEnsName } = useEnsName({
+    address: delegateFromTokenContract ?? undefined,
+  })
 
   const selfDelegate = [
     address!,
@@ -332,7 +337,7 @@ export function Manage() {
             hasPreExistingDelegates={hasPreExistingDelegates}
             description={
               delegateFromTokenContract
-                ? `Delegating to ${truncateAddress(delegateFromTokenContract)}`
+                ? `Delegating to ${delegateFromTokenContractEnsName ?? truncateAddress(delegateFromTokenContract)}`
                 : undefined
             }
           />

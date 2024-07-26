@@ -13,7 +13,7 @@ import profileIcon from '../assets/profileIcon.svg'
 import { DelegatePill } from '../components/DelegatePill'
 import { InnerCard } from '../components/InnerCard'
 import { useDelegationInfo } from '../hooks/useDelegationInfo'
-import { truncateAddress } from '../lib/utils'
+import { checkHasBalance, truncateAddress } from '../lib/utils'
 
 /* TODO: Maybe break some of this file into a separate component since it shares quite a bit of code with <Strategy /> */
 export function SharedStrategy() {
@@ -84,7 +84,7 @@ export function SharedStrategy() {
               )
             }
 
-            if (multiDelegates?.length === 0) {
+            if (!checkHasBalance({ balance, multiDelegates })) {
               return (
                 <Typography asProp="span" color="grey">
                   No delegations
