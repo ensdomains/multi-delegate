@@ -59,7 +59,7 @@ export function DelegateRow({
     <div className={cn('flex w-full', className)}>
       <div className="flex w-full items-center gap-2">
         <img
-          className={cn('rounded-full', isEmpty ? 'grayscale' : '')}
+          className={cn('rounded-full', isEmpty && 'grayscale')}
           src={isBalance ? tokenIcon : avatar || profileIcon}
           width={40}
           height={40}
