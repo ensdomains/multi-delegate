@@ -419,11 +419,14 @@ export function Manage() {
         <ButtonWrapper>
           {(() => {
             const hasSufficientAllowance =
-              typeof allowance === 'bigint' &&
-              (requiredRebalanceAllowance <= 0n ||
-                allowance >= requiredRebalanceAllowance)
+              typeof allowance === 'bigint' && requiredRebalanceAllowance <= 0n
 
-            console.log(hasSufficientAllowance)
+            console.log({
+              allowance,
+              reassignedTokens,
+              requiredRebalanceAllowance,
+              hasSufficientAllowance,
+            })
 
             if (!hasSufficientAllowance) {
               return (
