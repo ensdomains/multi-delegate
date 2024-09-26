@@ -150,6 +150,9 @@ export function Strategy() {
             )
           })()}
         </ButtonWrapper>
+        <Helper type="info">
+          Your delegated tokens will appear as NFTs in your wallet.
+        </Helper>
       </Card>
 
       <Toast
