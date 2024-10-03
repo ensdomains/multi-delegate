@@ -344,7 +344,13 @@ export function Manage() {
         </SmallCard>
 
         <SmallCard>
-          {delegatesArr.length === 0 && (
+          {delegationInfo.isLoading && (
+            <div className="flex justify-center py-6">
+              <Spinner size="medium" color="blue" />
+            </div>
+          )}
+
+          {!!delegationInfo.data && delegatesArr.length === 0 && (
             <div className="flex flex-col items-center gap-2 py-6 text-center">
               <AlertSVG className="text-ens-grey-primary" />
               <Typography color="grey">
