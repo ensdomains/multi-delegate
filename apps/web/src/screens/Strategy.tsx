@@ -102,6 +102,13 @@ export function Strategy() {
           )
         })()}
 
+        {checkHasBalance({ balance, multiDelegates }) && (
+          <Helper type="info">
+            Tokens delegated via the multi-delegate contract will appear as NFTs
+            in your wallet.
+          </Helper>
+        )}
+
         <ButtonWrapper>
           {(() => {
             if (!address) {
@@ -150,9 +157,6 @@ export function Strategy() {
             )
           })()}
         </ButtonWrapper>
-        <Helper type="info">
-          Your delegated tokens will appear as NFTs in your wallet.
-        </Helper>
       </Card>
 
       <Toast
