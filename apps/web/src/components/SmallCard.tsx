@@ -13,7 +13,7 @@ function Parent({ children, className }: Props) {
 }
 
 function Divider() {
-  return <BaseDivider className="mx-[-1rem]" />
+  return <BaseDivider className="-mx-4 w-[calc(100%+2rem)]" />
 }
 
 export const SmallCard = Object.assign(Parent, { Divider })
