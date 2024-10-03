@@ -121,17 +121,12 @@ export function Manage() {
   }, [multiDelegates])
 
   useEffect(() => {
-    // Close confirmation modal when transaction is initiated
-    if (receipt.data) {
-      setIsConfirmationModalOpen(false)
-    }
-
     // Refetch the delegateInfo 1s after a transaction (to let the indexer catch up)
     if (receipt.status) {
       setTimeout(() => delegationInfo.refetch(), 1000)
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [receipt])
+  }, [receipt.status])
 
   // Redirect if the user is not connected or has 0 tokens to make error handling easier
   if (!address || !checkHasBalance({ balance, multiDelegates })) {
@@ -416,7 +411,7 @@ export function Manage() {
                       functionName: 'approve',
                       args: [
                         erc20MultiDelegateContract.address,
-                        requiredRebalanceAllowance,
+                        reassignedTokens,
                       ],
                     })
                   }}
@@ -475,7 +470,12 @@ export function Manage() {
             </Button>
           }
           trailing={
-            <Button colorStyle="bluePrimary" onClick={handleUpdate}>
+            <Button
+              colorStyle="bluePrimary"
+              onClick={handleUpdate}
+              loading={receipt.isLoading}
+              disabled={toBeAllocated < 0n || changingDelegates.length === 0}
+            >
               Open Wallet
             </Button>
           }
