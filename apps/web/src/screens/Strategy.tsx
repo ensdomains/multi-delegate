@@ -86,6 +86,7 @@ export function Strategy() {
                     address={delegateFromTokenContract ?? undefined}
                     amount={balance}
                     tooltip="From the token contract"
+                    source="token"
                   />
                 )}
 
