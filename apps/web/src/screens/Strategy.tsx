@@ -105,7 +105,7 @@ export function Strategy() {
 
         {checkHasBalance({ balance, multiDelegates }) && (
           <Helper type="info">
-            Tokens delegated via the multi-delegate contract will appear as NFTs
+            Tokens delegated via the Multi-Delegate contract will appear as NFTs
             in your wallet.
           </Helper>
         )}
