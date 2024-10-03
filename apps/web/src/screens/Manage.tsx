@@ -1,7 +1,6 @@
 import {
   AlertSVG,
   Button,
-  Card,
   Dialog,
   Heading,
   PlusSVG,
@@ -308,7 +307,7 @@ export function Manage() {
     <>
       <Heading className="mb-4">Manage Strategy</Heading>
 
-      <Card>
+      <div className="flex flex-col gap-4">
         <SmallCard>
           <DelegateRow
             isBalance={true}
@@ -373,10 +372,6 @@ export function Manage() {
             Add delegate
           </Button>
         </ButtonWrapper>
-
-        <div className="py-1">
-          <Card.Divider />
-        </div>
 
         {receipt.isSuccess && (
           <Helper type="success" className="mx-auto">
@@ -445,7 +440,7 @@ export function Manage() {
             )
           })()}
         </ButtonWrapper>
-      </Card>
+      </div>
 
       <SearchModal
         isOpen={isSearchModalOpen}
