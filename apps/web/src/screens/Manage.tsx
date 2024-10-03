@@ -2,6 +2,7 @@ import {
   AlertSVG,
   Button,
   Card,
+  Dialog,
   Heading,
   PlusSVG,
   Spinner,
@@ -38,7 +39,8 @@ export function Manage() {
 
   const navigate = useNavigate()
   const delegationInfo = useDelegationInfo(address)
-  const [isModalOpen, setIsModalOpen] = useState(false)
+  const [isSearchModalOpen, setIsSearchModalOpen] = useState(false)
+  const [isConfirmationModalOpen, setIsConfirmationModalOpen] = useState(false)
 
   const [delegates, setDelegates] = useState<DelegateSelection>(new Map())
   const delegatesArr = Array.from(delegates)
@@ -119,13 +121,18 @@ export function Manage() {
     )
   }, [multiDelegates])
 
-  // Refetch the delegateInfo 1s after a transaction (to let the indexer catch up)
   useEffect(() => {
+    // Close confirmation modal when transaction is initiated
+    if (receipt.data) {
+      setIsConfirmationModalOpen(false)
+    }
+
+    // Refetch the delegateInfo 1s after a transaction (to let the indexer catch up)
     if (receipt.status) {
       setTimeout(() => delegationInfo.refetch(), 1000)
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [receipt.status])
+  }, [receipt])
 
   // Redirect if the user is not connected or has 0 tokens to make error handling easier
   if (!address || !checkHasBalance({ balance, multiDelegates })) {
@@ -359,7 +366,10 @@ export function Manage() {
         )}
 
         <ButtonWrapper>
-          <Button prefix={<PlusSVG />} onClick={() => setIsModalOpen(true)}>
+          <Button
+            prefix={<PlusSVG />}
+            onClick={() => setIsSearchModalOpen(true)}
+          >
             Add delegate
           </Button>
         </ButtonWrapper>
@@ -424,7 +434,7 @@ export function Manage() {
             return (
               <>
                 <Button
-                  onClick={handleUpdate}
+                  onClick={() => setIsConfirmationModalOpen(true)}
                   disabled={
                     toBeAllocated < 0n || changingDelegates.length === 0
                   }
@@ -438,11 +448,44 @@ export function Manage() {
       </Card>
 
       <SearchModal
-        isOpen={isModalOpen}
+        isOpen={isSearchModalOpen}
         delegates={delegates}
         setDelegates={setDelegates}
-        setIsModalOpen={setIsModalOpen}
+        setIsModalOpen={setIsSearchModalOpen}
       />
+
+      <Dialog
+        title="Delegated tokens will become NFTs"
+        variant="actionable"
+        onDismiss={() => setIsConfirmationModalOpen(false)}
+        open={isConfirmationModalOpen}
+      >
+        <Dialog.CloseButton onClick={() => setIsConfirmationModalOpen(false)} />
+
+        <div className="w-[28rem] max-w-full text-center">
+          <Typography>
+            When you delegate your $ENS tokens they will be swapped for NFTs
+            that represent each delegate. You can swap back to your tokens
+            anytime by undelegating.
+          </Typography>
+        </div>
+
+        <Dialog.Footer
+          leading={
+            <Button
+              colorStyle="blueSecondary"
+              onClick={() => setIsConfirmationModalOpen(false)}
+            >
+              Back
+            </Button>
+          }
+          trailing={
+            <Button colorStyle="bluePrimary" onClick={handleUpdate}>
+              Open Wallet
+            </Button>
+          }
+        />
+      </Dialog>
     </>
   )
 }
