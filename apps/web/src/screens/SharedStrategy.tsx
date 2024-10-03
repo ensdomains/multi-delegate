@@ -1,11 +1,12 @@
 import {
   Card,
   Heading,
+  OutlinkSVG,
   Skeleton,
   SkeletonGroup,
   Typography,
 } from '@ensdomains/thorin'
-import { useParams } from 'react-router-dom'
+import { Link, useParams } from 'react-router-dom'
 import { Address, isAddress } from 'viem'
 import { useEnsAddress, useEnsAvatar, useEnsName, useEnsText } from 'wagmi'
 
@@ -43,21 +44,13 @@ export function SharedStrategy() {
   const { multiDelegates, delegateFromTokenContract, balance } =
     delegationInfo.data ?? {}
 
-  // if (ensName.isLoading || ensAddress.isLoading) {
-  //   return <Spinner size="medium" />
-  // }
-
-  // if (!isParamAddress && !ensAddress.data) {
-  //   return <Helper type="error">Invalid name or address</Helper>
-  // }
-
   return (
     <SkeletonGroup loading={ensName.isLoading || ensAddress.isLoading}>
       <Heading className="mb-4">View Strategy</Heading>
 
       <Card className="mb-4">
-        <div className="flex flex-row items-center gap-4">
-          <div className="h-20 w-20 overflow-hidden rounded-full bg-red-300">
+        <div className="flex flex-col items-start sm:flex-row sm:items-center sm:gap-4">
+          <div className="aspect-square w-14 overflow-hidden rounded-full bg-red-300 sm:w-20">
             <img
               src={ensAvatar || profileIcon}
               className="w-full object-cover"
@@ -87,7 +80,7 @@ export function SharedStrategy() {
             if (!checkHasBalance({ balance, multiDelegates })) {
               return (
                 <Typography asProp="span" color="grey">
-                  No delegations
+                  No $ENS to delegate.
                 </Typography>
               )
             }
@@ -100,6 +93,7 @@ export function SharedStrategy() {
                     address={delegateFromTokenContract || undefined}
                     amount={balance}
                     tooltip="From the token contract"
+                    source="token"
                   />
                 )}
 
@@ -115,6 +109,17 @@ export function SharedStrategy() {
             )
           })()}
         </InnerCard>
+
+        <div className="flex flex-col items-center gap-1">
+          <Typography>
+            You are viewing the strategy of <strong>{name}</strong>
+          </Typography>
+
+          <Link to={`/strategy`} className=" flex items-center gap-1">
+            <Typography color="blue">View your own strategy</Typography>
+            <OutlinkSVG className="text-ens-blue-primary" />
+          </Link>
+        </div>
       </Card>
     </SkeletonGroup>
   )
