@@ -291,7 +291,6 @@ export function Manage() {
           targets.map((address) => BigInt(address)), // targets[]
           amounts, // amounts[]
         ],
-        gas: 5_000_000n,
       })
       .catch((e) => {
         console.error(e)
@@ -414,7 +413,6 @@ export function Manage() {
                         erc20MultiDelegateContract.address,
                         requiredRebalanceAllowance,
                       ],
-                      gas: 5_000_000n,
                     })
                   }}
                 >
