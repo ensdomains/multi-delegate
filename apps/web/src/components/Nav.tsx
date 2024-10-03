@@ -26,7 +26,7 @@ export function Nav() {
             <img src={logo} alt="logo" />
           </Link>
 
-          <div className="flex gap-4">
+          <div className="hidden gap-4 sm:flex">
             <Link to="https://ensdao.org/">
               <Typography asProp="span" color="grey" weight="bold">
                 DAO
