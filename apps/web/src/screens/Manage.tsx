@@ -79,6 +79,7 @@ export function Manage() {
     address!,
     { preExistingBalance: balance || 0n, newBalance: toBeAllocated },
   ] as const
+
   const changingDelegates = [...delegatesArr, selfDelegate]
     .filter(
       ([, { preExistingBalance, newBalance }]) =>
@@ -134,193 +135,167 @@ export function Manage() {
   function handleUpdate() {
     if (!address) return
 
-    if (allocatedDelegates.length === 0) {
-      alert('Please allocate some tokens to a delegate')
-    } else {
-      console.log('Delegating via the multiDelegate contract')
-
-      if (allocatedDelegates.map((del) => del[0]).includes(address)) {
-        return alert('You cannot delegate to yourself')
-      }
-
-      console.log({
-        changingDelegates,
-      })
-
-      const positiveChangingDelegates = changingDelegates
-        .slice()
-        .filter(([, { change }]) => change > 0n)
-        .sort(([, { change: a }], [, { change: b }]) => Number(b - a))
-        .map(([address, { change }]) => [address, change] as [Address, bigint])
-      const negativeChangingDelegates = changingDelegates
-        .slice()
-        .filter(([, { change }]) => change < 0n)
-        .sort(([, { change: a }], [, { change: b }]) => Number(a - b))
-        .map(
-          ([address, { change }]) =>
-            [address, change * -1n] as [Address, bigint]
-        )
-      const removeMatchingNegativeDelegate = ([
-        referenceAddress,
-        referenceChange,
-      ]: [Address, bigint]) => {
-        const index = negativeChangingDelegates.findIndex(
-          ([address, change]) =>
-            address === referenceAddress && change === referenceChange
-        )
-        console.log('Removing neg for index', index)
-        if (index !== -1) negativeChangingDelegates.splice(index, 1)
-      }
-
-      let sources: Address[] = []
-      let targets: Address[] = []
-      const amounts: bigint[] = []
-
-      const checkForWithTargetTransactions = (txs: number) => {
-        console.log('Checking for txs', txs)
-        for (const [
-          positiveAddress,
-          positiveChange,
-        ] of positiveChangingDelegates) {
-          const negativeConsumed: [Address, bigint, partial: boolean][] = []
-          let remainingChange = positiveChange
-          let i = 0
-
-          while (i < negativeChangingDelegates.length) {
-            if (i > txs) break
-            const negativeDelegate = negativeChangingDelegates[i]
-            const [negativeDelegateAddress, negativeChange] = negativeDelegate
-            if (
-              remainingChange > negativeChange ||
-              remainingChange === negativeChange
-            ) {
-              console.log({ remainingChange, negativeChange })
-              negativeConsumed.push([...negativeChangingDelegates[i], false])
-              remainingChange = remainingChange - negativeChange
-              console.log('Remaining change after', remainingChange)
-              i++
-              if (remainingChange === 0n) break
-              else continue
-            }
-
-            negativeConsumed.push([
-              negativeDelegateAddress,
-              remainingChange,
-              true,
-            ])
-            negativeDelegate[1] = negativeChange - remainingChange
-            remainingChange = 0n
-            console.log('Using partial')
-            console.log('Remaining partial', negativeDelegate)
-            break
-          }
-
-          if (remainingChange !== 0n) continue
-
-          for (const [
-            negativeAddress,
-            negativeChange,
-            partial,
-          ] of negativeConsumed) {
-            sources.push(negativeAddress)
-            targets.push(positiveAddress)
-            amounts.push(negativeChange)
-            if (!partial)
-              removeMatchingNegativeDelegate([negativeAddress, negativeChange])
-          }
-          positiveChangingDelegates.splice(
-            positiveChangingDelegates.findIndex(
-              ([address, change]) =>
-                address === positiveAddress && change === positiveChange
-            ),
-            1
-          )
-        }
-      }
-
-      for (let i = 1; i < 10; i++) {
-        checkForWithTargetTransactions(i)
-        if (!positiveChangingDelegates.length) break
-      }
-
-      if (positiveChangingDelegates.length)
-        checkForWithTargetTransactions(Infinity)
-      console.log({ sources, targets, amounts })
-      if (positiveChangingDelegates.length)
-        throw new Error("couldn't get transfers")
-
-      console.log('123 TEST 123!!!!\n\n\n')
-
-      let hasOwnSource = false
-      let hasOwnTarget = false
-
-      const allReferences = amounts
-        .map((a, i) => {
-          let source: Address | undefined = sources[i]
-          if (source === address) {
-            hasOwnSource = true
-            source = undefined
-          }
-          let target: Address | undefined = targets[i]
-          if (target === address) {
-            hasOwnTarget = true
-            target = undefined
-          }
-
-          return {
-            source,
-            target,
-            amount: a,
-          }
-        })
-        .sort((a, b) => {
-          if (a.target === undefined || a.source === undefined) return 1
-          if (b.target === undefined || b.source === undefined) return -1
-          return 0
-        })
-
-      sources = []
-      targets = []
-
-      for (let i = 0; i < allReferences.length; i++) {
-        const reference = allReferences[i]
-        if (reference.source) sources[i] = reference.source
-        if (reference.target) targets[i] = reference.target
-        amounts[i] = reference.amount
-      }
-
-      console.log({
-        sources: sources.slice(),
-        targets: targets.slice(),
-        amounts: amounts.slice(),
-      })
-
-      if (hasOwnSource && hasOwnTarget) {
-        // should be unreachable but idk
-        throw new Error('unreachable??')
-      }
-
-      console.log({
-        sources,
-        targets,
-        amounts,
-      })
-
-      // If the user has multiple delegates selected, use the multiDelegate contract
-      write
-        .writeContractAsync({
-          ...erc20MultiDelegateContract,
-          functionName: 'delegateMulti',
-          args: [
-            sources.map((address) => BigInt(address)), // sources[]
-            targets.map((address) => BigInt(address)), // targets[]
-            amounts, // amounts[]
-          ],
-        })
-        .catch((e) => {
-          console.error(e)
-        })
+    if (allocatedDelegates.map((del) => del[0]).includes(address)) {
+      return alert('You cannot delegate to yourself')
     }
+
+    const positiveChangingDelegates = changingDelegates
+      .slice()
+      .filter(([, { change }]) => change > 0n)
+      .sort(([, { change: a }], [, { change: b }]) => Number(b - a))
+      .map(([address, { change }]) => [address, change] as [Address, bigint])
+    const negativeChangingDelegates = changingDelegates
+      .slice()
+      .filter(([, { change }]) => change < 0n)
+      .sort(([, { change: a }], [, { change: b }]) => Number(a - b))
+      .map(
+        ([address, { change }]) => [address, change * -1n] as [Address, bigint]
+      )
+    const removeMatchingNegativeDelegate = ([
+      referenceAddress,
+      referenceChange,
+    ]: [Address, bigint]) => {
+      const index = negativeChangingDelegates.findIndex(
+        ([address, change]) =>
+          address === referenceAddress && change === referenceChange
+      )
+
+      if (index !== -1) negativeChangingDelegates.splice(index, 1)
+    }
+
+    let sources: Address[] = []
+    let targets: Address[] = []
+    const amounts: bigint[] = []
+
+    const checkForWithTargetTransactions = (txs: number) => {
+      for (const [
+        positiveAddress,
+        positiveChange,
+      ] of positiveChangingDelegates) {
+        const negativeConsumed: [Address, bigint, partial: boolean][] = []
+        let remainingChange = positiveChange
+        let i = 0
+
+        while (i < negativeChangingDelegates.length) {
+          if (i > txs) break
+          const negativeDelegate = negativeChangingDelegates[i]
+          const [negativeDelegateAddress, negativeChange] = negativeDelegate
+          if (
+            remainingChange > negativeChange ||
+            remainingChange === negativeChange
+          ) {
+            negativeConsumed.push([...negativeChangingDelegates[i], false])
+            remainingChange = remainingChange - negativeChange
+            i++
+            if (remainingChange === 0n) break
+            else continue
+          }
+
+          negativeConsumed.push([
+            negativeDelegateAddress,
+            remainingChange,
+            true,
+          ])
+          negativeDelegate[1] = negativeChange - remainingChange
+          remainingChange = 0n
+          break
+        }
+
+        if (remainingChange !== 0n) continue
+
+        for (const [
+          negativeAddress,
+          negativeChange,
+          partial,
+        ] of negativeConsumed) {
+          sources.push(negativeAddress)
+          targets.push(positiveAddress)
+          amounts.push(negativeChange)
+          if (!partial)
+            removeMatchingNegativeDelegate([negativeAddress, negativeChange])
+        }
+        positiveChangingDelegates.splice(
+          positiveChangingDelegates.findIndex(
+            ([address, change]) =>
+              address === positiveAddress && change === positiveChange
+          ),
+          1
+        )
+      }
+    }
+
+    for (let i = 1; i < 10; i++) {
+      checkForWithTargetTransactions(i)
+      if (!positiveChangingDelegates.length) break
+    }
+
+    if (positiveChangingDelegates.length) {
+      checkForWithTargetTransactions(Infinity)
+    }
+
+    if (positiveChangingDelegates.length) {
+      throw new Error("Couldn't get transfers")
+    }
+
+    let hasOwnSource = false
+    let hasOwnTarget = false
+
+    const allReferences = amounts
+      .map((a, i) => {
+        let source: Address | undefined = sources[i]
+        if (source === address) {
+          hasOwnSource = true
+          source = undefined
+        }
+        let target: Address | undefined = targets[i]
+        if (target === address) {
+          hasOwnTarget = true
+          target = undefined
+        }
+
+        return {
+          source,
+          target,
+          amount: a,
+        }
+      })
+      .sort((a, b) => {
+        if (a.target === undefined || a.source === undefined) return 1
+        if (b.target === undefined || b.source === undefined) return -1
+        return 0
+      })
+
+    sources = []
+    targets = []
+
+    for (let i = 0; i < allReferences.length; i++) {
+      const reference = allReferences[i]
+      if (reference.source) sources[i] = reference.source
+      if (reference.target) targets[i] = reference.target
+      amounts[i] = reference.amount
+    }
+
+    if (hasOwnSource && hasOwnTarget) {
+      // should be unreachable but idk
+      throw new Error('unreachable??')
+    }
+
+    console.log({ sources, targets, amounts })
+
+    write
+      .writeContractAsync({
+        ...erc20MultiDelegateContract,
+        functionName: 'delegateMulti',
+        args: [
+          sources.map((address) => BigInt(address)), // sources[]
+          targets.map((address) => BigInt(address)), // targets[]
+          amounts, // amounts[]
+        ],
+        gas: 5_000_000n,
+      })
+      .catch((e) => {
+        console.error(e)
+      })
   }
 
   return (
@@ -427,13 +402,6 @@ export function Manage() {
             const hasSufficientAllowance =
               typeof allowance === 'bigint' && requiredRebalanceAllowance <= 0n
 
-            console.log({
-              allowance,
-              reassignedTokens,
-              requiredRebalanceAllowance,
-              hasSufficientAllowance,
-            })
-
             if (!hasSufficientAllowance) {
               return (
                 <Button
@@ -446,6 +414,7 @@ export function Manage() {
                         erc20MultiDelegateContract.address,
                         requiredRebalanceAllowance,
                       ],
+                      gas: 5_000_000n,
                     })
                   }}
                 >
@@ -456,32 +425,11 @@ export function Manage() {
 
             return (
               <>
-                {(multiDelegates?.length || 0) > 0 && (
-                  <Button
-                    colorStyle="blueSecondary"
-                    onClick={() => {
-                      write.writeContract({
-                        ...erc20MultiDelegateContract,
-                        functionName: 'delegateMulti',
-                        args: [
-                          multiDelegates!.map((delegate) =>
-                            BigInt(delegate.tokenId)
-                          ), // sources[]
-                          [], // targets[]
-                          multiDelegates!.map((delegate) =>
-                            BigInt(delegate.amount)
-                          ), // amounts[]
-                        ],
-                      })
-                    }}
-                  >
-                    Reclaim Tokens
-                  </Button>
-                )}
-
                 <Button
                   onClick={handleUpdate}
-                  disabled={!allocatedVotingPower || toBeAllocated < 0n}
+                  disabled={
+                    toBeAllocated < 0n || changingDelegates.length === 0
+                  }
                 >
                   Update Strategy
                 </Button>

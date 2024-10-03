@@ -90,8 +90,6 @@ async function getDelegatesFromEventLogs(
     toBlock: 'latest',
   })
 
-  console.log(logs)
-
   const _tokenIds = new Set(logs.map((log) => log.args.ids!).flat())
   const tokenIds = Array.from(_tokenIds)
 
@@ -101,15 +99,11 @@ async function getDelegatesFromEventLogs(
     args: [new Array(tokenIds.length).fill(address), tokenIds],
   })
 
-  console.log(balanceOf)
-
   const data = tokenIds.map((tokenId, index) => ({
     delegate: toHex(tokenId),
     tokenId: tokenId.toString(),
     amount: balanceOf[index].toString(),
   }))
-
-  console.log(data)
 
   return data.filter((item) => item.amount !== '0')
 }
