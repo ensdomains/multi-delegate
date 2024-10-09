@@ -1,6 +1,4 @@
-import * as ReactRouterDom from 'react-router-dom'
 import { describe, expect, it } from 'vitest'
-import { vi } from 'vitest'
 
 // New mock for react-router-dom
 import App from './App'
