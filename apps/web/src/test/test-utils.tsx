@@ -24,6 +24,17 @@ vi.mock('react-router-dom', async () => {
   }
 })
 
+// Mock RainbowKitProvider
+vi.mock('@rainbow-me/rainbowkit', async () => {
+  const actual = await vi.importActual('@rainbow-me/rainbowkit')
+  return {
+    ...actual,
+    RainbowKitProvider: ({ children }: { children: React.ReactNode }) => (
+      <>{children}</>
+    ),
+  }
+})
+
 const queryClient = new QueryClient()
 
 function AllTheProviders({ children }: { children: React.ReactNode }) {

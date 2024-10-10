@@ -5,7 +5,7 @@ import { useEnsAvatar, useEnsName } from 'wagmi'
 import profileIcon from '../assets/profileIcon.svg'
 import tokenIcon from '../assets/tokenIcon.svg'
 import { NULL, cn, truncateAddress } from '../lib/utils'
-import { DelegateSelection } from '../screens/Manage'
+import type { DelegateSelection } from '../screens/Manage'
 
 type Props = {
   isBalance?: boolean
@@ -32,6 +32,8 @@ export function DelegateRow({
 }: Props) {
   const { data: name } = useEnsName({ address })
   const { data: avatar } = useEnsAvatar({ name: name || undefined })
+
+  console.log('avatar', avatar)
 
   const isUndelegated = address === NULL
   const isEmpty = !isBalance && newBalance <= 0n
@@ -63,6 +65,7 @@ export function DelegateRow({
           src={isBalance ? tokenIcon : avatar || profileIcon}
           width={40}
           height={40}
+          alt="icon"
         />
 
         <div className="flex flex-col">
@@ -113,6 +116,7 @@ export function DelegateRow({
         })()}
         <div className="w-32">
           <Input
+            data-testid="delegate-amount-input"
             size="small"
             placeholder=""
             label=""
