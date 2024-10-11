@@ -1,5 +1,5 @@
 export const ensTokenContract = {
-  address: '0xC18360217D8F7Ab5e7c516566761Ea12Ce7F9D72',
+  address: '0x439253e0b11e884201bf1e3268442a4fa75f9cfe',
   abi: [
     {
       inputs: [
