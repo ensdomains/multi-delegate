@@ -76,7 +76,7 @@ describe('useDelegateSearch', () => {
     })
   })
 
-  it.only('adds searchQuery to the top of the list if it is a potential domain', async () => {
+  it('adds searchQuery to the top of the list if it is a potential domain', async () => {
     const searchQuery = 'test.com'
     const mockResponse = {
       data: {
