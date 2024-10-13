@@ -8,7 +8,6 @@ import { useDelegationInfo } from '../hooks/useDelegationInfo'
 import { render, screen } from '../test/test-utils'
 import { SharedStrategy } from './SharedStrategy'
 
-// Mock the hooks
 vi.mock('react-router-dom', async () => {
   const actual = await vi.importActual('react-router-dom')
   return {

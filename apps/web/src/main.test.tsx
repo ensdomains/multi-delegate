@@ -2,7 +2,6 @@ import React from 'react'
 import { createRoot } from 'react-dom/client'
 import { describe, expect, it, vi } from 'vitest'
 
-// Mock the modules and components
 vi.mock(import('react-dom/client'), async (importOriginal) => {
   const actual = await importOriginal()
   return {

@@ -5,12 +5,10 @@ import { describe, expect, it, vi } from 'vitest'
 import { GRAPH_URL } from '../lib/env'
 import { useDelegateSearch } from './useDelegateSearch'
 
-// Mock the @tanstack/react-query useQuery hook
 vi.mock('@tanstack/react-query', () => ({
   useQuery: vi.fn(),
 }))
 
-// Mock the fetch function
 global.fetch = vi.fn()
 
 describe('useDelegateSearch', () => {

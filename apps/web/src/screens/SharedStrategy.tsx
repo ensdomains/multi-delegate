@@ -21,8 +21,6 @@ export function SharedStrategy() {
   const { addressOrName } = useParams() as { addressOrName: string }
   const isParamAddress = isAddress(addressOrName, { strict: false })
 
-  console.log('addressOrName: ', addressOrName)
-
   const ensName = useEnsName({
     address: addressOrName as Address,
     query: { enabled: isParamAddress },

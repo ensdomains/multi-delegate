@@ -5,7 +5,6 @@ import { useEnsAvatar, useEnsName } from 'wagmi'
 import { render, screen } from '../test/test-utils'
 import { DelegateRow } from './DelegateRow'
 
-// Mock wagmi hooks
 vi.mock(import('wagmi'), async (importOriginal) => {
   const wagmi = await importOriginal()
   return {

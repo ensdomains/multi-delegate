@@ -6,7 +6,6 @@ import { usePublicClient } from 'wagmi'
 
 import { useDelegationInfo } from './useDelegationInfo'
 
-// Mock dependencies
 vi.mock('@tanstack/react-query')
 vi.mock('wagmi')
 vi.mock('../lib/env', () => ({

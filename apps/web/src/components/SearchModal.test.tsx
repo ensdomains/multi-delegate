@@ -5,7 +5,6 @@ import { useDelegateSearch } from '../hooks/useDelegateSearch'
 import { fireEvent, render, screen, waitFor } from '../test/test-utils'
 import { SearchModal } from './SearchModal'
 
-// Mock the useDelegateSearch hook
 vi.mock('../hooks/useDelegateSearch', () => ({
   useDelegateSearch: vi.fn(() => ({
     isLoading: false,
@@ -14,7 +13,6 @@ vi.mock('../hooks/useDelegateSearch', () => ({
   })),
 }))
 
-// Mock the useDebounceValue hook
 vi.mock('usehooks-ts', () => ({
   useDebounceValue: vi.fn((initialValue) => [initialValue, vi.fn()]),
 }))

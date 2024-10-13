@@ -6,7 +6,6 @@ import { useDelegationInfo } from '../hooks/useDelegationInfo'
 import { render, screen } from '../test/test-utils'
 import { Strategy } from './Strategy'
 
-// Mock the hooks
 vi.mock('wagmi', async () => {
   const actual = await vi.importActual('wagmi')
   return {

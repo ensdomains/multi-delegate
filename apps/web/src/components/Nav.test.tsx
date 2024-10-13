@@ -6,7 +6,6 @@ import { useAccount, useDisconnect, useEnsAvatar, useEnsName } from 'wagmi'
 import { fireEvent, render, screen } from '../test/test-utils'
 import { Nav } from './Nav'
 
-// Mock the hooks
 vi.mock(import('wagmi'), async (importOriginal) => {
   const wagmi = await importOriginal()
   return {

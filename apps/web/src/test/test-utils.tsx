@@ -10,7 +10,6 @@ import { WagmiProvider } from 'wagmi'
 
 import { wagmiConfig } from '../lib/web3'
 
-// Mock RainbowKitProvider
 vi.mock('@rainbow-me/rainbowkit', async () => {
   const actual = await vi.importActual('@rainbow-me/rainbowkit')
   return {

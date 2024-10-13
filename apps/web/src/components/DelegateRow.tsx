@@ -33,8 +33,6 @@ export function DelegateRow({
   const { data: name } = useEnsName({ address })
   const { data: avatar } = useEnsAvatar({ name: name || undefined })
 
-  console.log('avatar', avatar)
-
   const isUndelegated = address === NULL
   const isEmpty = !isBalance && newBalance <= 0n
 

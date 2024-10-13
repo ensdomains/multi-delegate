@@ -63,7 +63,6 @@ export function SearchModal({
         hideLabel
         placeholder="ENS name or Ethereum address"
         onChange={(e) => {
-          console.log('e', e.target.value)
           setSearchQuery(e.target.value)
         }}
         prefix={<MagnifyingGlassSimpleSVG />}
