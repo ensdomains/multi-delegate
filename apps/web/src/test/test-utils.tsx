@@ -10,20 +10,6 @@ import { WagmiProvider } from 'wagmi'
 
 import { wagmiConfig } from '../lib/web3'
 
-// Mock react-router-dom
-vi.mock('react-router-dom', async () => {
-  const actual = await vi.importActual('react-router-dom')
-  return {
-    ...actual,
-    useLocation: vi.fn(() => ({
-      pathname: '/mocked-path',
-      search: '',
-      hash: '',
-      state: null,
-    })),
-  }
-})
-
 // Mock RainbowKitProvider
 vi.mock('@rainbow-me/rainbowkit', async () => {
   const actual = await vi.importActual('@rainbow-me/rainbowkit')

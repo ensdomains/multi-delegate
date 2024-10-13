@@ -21,6 +21,8 @@ export function SharedStrategy() {
   const { addressOrName } = useParams() as { addressOrName: string }
   const isParamAddress = isAddress(addressOrName, { strict: false })
 
+  console.log('addressOrName: ', addressOrName)
+
   const ensName = useEnsName({
     address: addressOrName as Address,
     query: { enabled: isParamAddress },
@@ -58,8 +60,10 @@ export function SharedStrategy() {
           </div>
 
           <div className="flex flex-col gap-2">
-            <Typography fontVariant="headingTwo">{name}</Typography>
-            <Typography>{ensDescription}</Typography>
+            <Typography data-testid="strategy-name" fontVariant="headingTwo">
+              {name}
+            </Typography>
+            <Typography data-testid="description">{ensDescription}</Typography>
           </div>
         </div>
       </Card>
