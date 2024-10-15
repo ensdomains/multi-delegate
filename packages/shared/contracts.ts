@@ -1,5 +1,5 @@
 export const ensTokenContract = {
-  address: '0x439253e0b11e884201bf1e3268442a4fa75f9cfe',
+  address: '0xC18360217D8F7Ab5e7c516566761Ea12Ce7F9D72',
   abi: [
     {
       inputs: [
@@ -466,8 +466,8 @@ export const ensTokenContract = {
 } as const
 
 export const erc20MultiDelegateContract = {
-  address: '0xde0e6beac243686ca9dbf0364e8246b9aaac370c',
-  deployedBock: 19520101,
+  address: '0x439253e0b11e884201bf1e3268442a4fa75f9cfe',
+  deployedBock: 20921243,
   abi: [
     {
       inputs: [
