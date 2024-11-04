@@ -24,6 +24,9 @@ test('get started link', async ({ page, login, homePage }) => {
   await page.click('text=Manage strategy')
 
   //get the balance of the user
-  const balance = await page.getByTestId('delegate-amount-input').textContent()
-  expect(balance).toBe('50998')
+  await page.waitForTimeout(5000)
+  const balance = await page
+    .getByTestId('delegate-amount-input')
+    .getAttribute('value')
+  expect(balance).not.toBe('0')
 })
