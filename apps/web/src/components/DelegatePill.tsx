@@ -4,7 +4,7 @@ import { useEnsAvatar, useEnsName } from 'wagmi'
 
 import profileIcon from '../assets/profileIcon.svg'
 import tokenIcon from '../assets/tokenIcon.svg'
-import { NULL, formatNumber, truncateAddress } from '../lib/utils'
+import { formatNumber, truncateAddress } from '../lib/utils'
 
 type Props = {
   address: Address | undefined
@@ -18,14 +18,12 @@ export function DelegatePill({ address, amount, tooltip, source }: Props) {
   const { data: avatar } = useEnsAvatar({ name: name || undefined })
 
   const normalizedAmount = formatNumber(amount, 'string')
-  const isUndelegated = address === NULL
-
-  if (!address) return null
+  const isUndelegated = address === undefined
 
   const content = (
     <div className="border-ens-additional-border flex w-fit items-center gap-2 rounded-full border bg-white p-1">
       <div className="flex items-center">
-        {source === 'token' && (
+        {source === 'token' && !isUndelegated && (
           <img
             className="-mr-3 rounded-full"
             src={tokenIcon}

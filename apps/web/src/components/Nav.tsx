@@ -17,7 +17,7 @@ export function Nav() {
     <div>
       <Helper type="warning" alignment="horizontal" className="mb-4">
         Use this JSON RPC in your wallet:
-        https://virtual.mainnet.rpc.tenderly.co/78d3d569-cb63-45a9-8b8c-9d152d90c3ed
+        https://virtual.mainnet.rpc.tenderly.co/c5b762a9-addb-468c-ad6a-f11c0df62605
       </Helper>
 
       <nav className="flex justify-between gap-4">

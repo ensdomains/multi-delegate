@@ -4,7 +4,7 @@ export const GRAPH_URL =
 
 export const RPC_URL =
   import.meta.env.VITE_PUBLIC_RPC_URL ||
-  'https://virtual.mainnet.rpc.tenderly.co/78d3d569-cb63-45a9-8b8c-9d152d90c3ed'
+  'https://virtual.mainnet.rpc.tenderly.co/c5b762a9-addb-468c-ad6a-f11c0df62605'
 
 export const PONDER_URL =
   (import.meta.env.VITE_PUBLIC_PONDER_URL as string) || undefined

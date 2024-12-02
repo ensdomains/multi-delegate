@@ -36,5 +36,12 @@ ponder.get('/:address', async (c) => {
   }))
 
   // remove delegates with no balance
-  return c.json(data.filter((item) => item.amount !== '0'))
+  return c.json(
+    data
+      .filter((item) => item.amount !== '0')
+      .map((item) => ({
+        ...item,
+        tokenId: item.tokenId.toString(),
+      }))
+  )
 })
