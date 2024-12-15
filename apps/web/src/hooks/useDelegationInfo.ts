@@ -1,7 +1,7 @@
 import { useQuery } from '@tanstack/react-query'
-import { ensTokenContract, erc20MultiDelegateContract } from 'shared/contracts'
+import { createContractConfigs } from 'shared/contracts'
 import { Address, PublicClient, isAddress, toHex, zeroAddress } from 'viem'
-import { usePublicClient } from 'wagmi'
+import { usePublicClient, useChainId } from 'wagmi'
 
 import { PONDER_URL } from '../lib/env'
 import { wagmiConfig } from '../lib/web3'
@@ -15,9 +15,11 @@ export type DelegateApiResponse = {
 
 export function useDelegationInfo(address?: Address | null) {
   const viemClient = usePublicClient({ config: wagmiConfig })
+  const chainId = useChainId()
+  const contracts = createContractConfigs(chainId)
 
   return useQuery({
-    queryKey: ['delegates', address],
+    queryKey: ['delegates', address, chainId],
     queryFn: async () => {
       if (!address || !isAddress(address)) {
         return {}
@@ -25,25 +27,25 @@ export function useDelegationInfo(address?: Address | null) {
 
       const multiDelegates = PONDER_URL
         ? await getDelegatesFromIndexer(address)
-        : await getDelegatesFromEventLogs(viemClient, address)
+        : await getDelegatesFromEventLogs(viemClient, address, contracts)
 
       const [_delegateFromTokenContract, _balance, _allowance] =
         await viemClient.multicall({
           contracts: [
             {
-              ...ensTokenContract,
+              ...contracts.ensToken,
               functionName: 'delegates',
               args: [address],
             },
             {
-              ...ensTokenContract,
+              ...contracts.ensToken,
               functionName: 'balanceOf',
               args: [address],
             },
             {
-              ...ensTokenContract,
+              ...contracts.ensToken,
               functionName: 'allowance',
-              args: [address, erc20MultiDelegateContract.address],
+              args: [address, contracts.erc20MultiDelegate.address],
             },
           ],
         })
@@ -78,15 +80,16 @@ async function getDelegatesFromIndexer(address: Address) {
 // will become increasingly slow as the age of the contract increases
 async function getDelegatesFromEventLogs(
   client: PublicClient,
-  address: Address
+  address: Address,
+  contracts: ReturnType<typeof createContractConfigs>
 ): Promise<DelegateApiResponse[]> {
   const logs = await client.getLogs({
-    address: erc20MultiDelegateContract.address,
-    event: erc20MultiDelegateContract.abi[5],
+    address: contracts.erc20MultiDelegate.address,
+    event: contracts.erc20MultiDelegate.abi[5],
     args: {
       to: address,
     },
-    fromBlock: BigInt(erc20MultiDelegateContract.deployedBock),
+    fromBlock: BigInt(contracts.erc20MultiDelegate.deployedBlock),
     toBlock: 'latest',
   })
 
@@ -94,7 +97,7 @@ async function getDelegatesFromEventLogs(
   const tokenIds = Array.from(_tokenIds)
 
   const balanceOf = await client.readContract({
-    ...erc20MultiDelegateContract,
+    ...contracts.erc20MultiDelegate,
     functionName: 'balanceOfBatch',
     args: [new Array(tokenIds.length).fill(address), tokenIds],
   })

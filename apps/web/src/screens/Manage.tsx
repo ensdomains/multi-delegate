@@ -9,13 +9,14 @@ import {
 } from '@ensdomains/thorin'
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { ensTokenContract, erc20MultiDelegateContract } from 'shared/contracts'
+import { createContractConfigs } from 'shared/contracts'
 import { Address } from 'viem'
 import {
   useAccount,
   useEnsName,
   useWaitForTransactionReceipt,
   useWriteContract,
+  useChainId,
 } from 'wagmi'
 
 import { ButtonWrapper } from '../components/ButtonWrapper'
@@ -33,6 +34,8 @@ export type DelegateSelection = Map<
 
 export function Manage() {
   const { address } = useAccount()
+  const chainId = useChainId()
+  const contracts = createContractConfigs(chainId)
   const write = useWriteContract()
   const receipt = useWaitForTransactionReceipt({ hash: write.data })
 
@@ -285,7 +288,7 @@ export function Manage() {
 
     write
       .writeContractAsync({
-        ...erc20MultiDelegateContract,
+        ...contracts.erc20MultiDelegate,
         functionName: 'delegateMulti',
         args: [
           sources.map((address) => BigInt(address)), // sources[]
@@ -407,10 +410,10 @@ export function Manage() {
                   disabled={!requiredRebalanceAllowance}
                   onClick={() => {
                     write.writeContract({
-                      ...ensTokenContract,
+                      ...contracts.ensToken,
                       functionName: 'approve',
                       args: [
-                        erc20MultiDelegateContract.address,
+                        contracts.erc20MultiDelegate.address,
                         reassignedTokens,
                       ],
                     })

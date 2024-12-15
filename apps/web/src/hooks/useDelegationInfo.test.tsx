@@ -2,7 +2,7 @@ import { useQuery } from '@tanstack/react-query'
 import { renderHook, waitFor } from '@testing-library/react'
 import { Address, PublicClient } from 'viem'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
-import { usePublicClient } from 'wagmi'
+import { useChainId, usePublicClient } from 'wagmi'
 
 import { useDelegationInfo } from './useDelegationInfo'
 
@@ -18,9 +18,17 @@ vi.mock('shared/contracts', () => ({
   ensTokenContract: { address: '0xensTokenAddress' },
   erc20MultiDelegateContract: {
     address: '0xmultiDelegateAddress',
-    deployedBock: '123456',
+    deployedBlock: '123456',
     abi: [{}, {}, {}, {}, {}, { type: 'event' }],
   },
+  createContractConfigs: () => ({
+    ensToken: { address: '0xensTokenAddress' },
+    erc20MultiDelegate: {
+      address: '0xmultiDelegateAddress',
+      deployedBlock: '123456',
+      abi: [{}, {}, {}, {}, {}, { type: 'event' }],
+    },
+  }),
 }))
 
 describe('useDelegationInfo', () => {
@@ -34,13 +42,14 @@ describe('useDelegationInfo', () => {
   beforeEach(() => {
     vi.clearAllMocks()
     ;(usePublicClient as any).mockReturnValue(mockPublicClient)
+    ;(useChainId as any).mockReturnValue(1)
     ;(useQuery as any).mockImplementation(({ queryFn }) => ({
       data: queryFn,
     }))
   })
 
   it('should return empty object for invalid address', async () => {
-    const { result } = renderHook(() => useDelegationInfo('invalid-address'))
+    const { result } = renderHook(() => useDelegationInfo('0x123'))
     const resolvedResult = await result.current.data()
 
     await waitFor(() => {
