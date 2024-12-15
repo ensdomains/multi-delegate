@@ -58,8 +58,10 @@ export function SharedStrategy() {
           </div>
 
           <div className="flex flex-col gap-2">
-            <Typography fontVariant="headingTwo">{name}</Typography>
-            <Typography>{ensDescription}</Typography>
+            <Typography data-testid="strategy-name" fontVariant="headingTwo">
+              {name}
+            </Typography>
+            <Typography data-testid="description">{ensDescription}</Typography>
           </div>
         </div>
       </Card>

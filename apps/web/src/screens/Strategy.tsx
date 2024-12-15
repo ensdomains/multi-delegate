@@ -59,7 +59,7 @@ export function Strategy() {
             return (
               <InnerCard className="flex justify-center">
                 <div className="overflow-hidden rounded-full">
-                  <Skeleton loading>
+                  <Skeleton loading data-testid="skeleton-loading">
                     <DelegatePill address="0x00000000" amount={1000n} />
                   </Skeleton>
                 </div>

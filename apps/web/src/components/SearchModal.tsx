@@ -62,7 +62,9 @@ export function SearchModal({
         label=""
         hideLabel
         placeholder="ENS name or Ethereum address"
-        onChange={(e) => setSearchQuery(e.target.value)}
+        onChange={(e) => {
+          setSearchQuery(e.target.value)
+        }}
         prefix={<MagnifyingGlassSimpleSVG />}
       />
 
@@ -75,7 +77,13 @@ export function SearchModal({
       >
         {(() => {
           if (search.isLoading) {
-            return <Spinner size="medium" color="blue" />
+            return (
+              <Spinner
+                data-testid="searchLoadingSpinner"
+                size="medium"
+                color="blue"
+              />
+            )
           }
 
           if (search.data?.length === 0 || search.isError) {

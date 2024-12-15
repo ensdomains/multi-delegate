@@ -60,6 +60,7 @@ export function Nav() {
             className="transition hover:-translate-y-[1px] hover:opacity-75"
             src={profileIcon}
             onClick={openConnectModal}
+            alt="profile icon"
           />
         )}
       </nav>

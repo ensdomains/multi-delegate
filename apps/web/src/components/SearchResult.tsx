@@ -17,6 +17,7 @@ export function SearchResult({ name, addDelegate }: Props) {
 
   return (
     <button
+      data-testid="searchResult"
       className="flex w-full items-center gap-2 rounded-lg px-2 py-3 transition enabled:hover:scale-[1.01] disabled:cursor-not-allowed disabled:opacity-50"
       onClick={() => {
         if (address.data) {
