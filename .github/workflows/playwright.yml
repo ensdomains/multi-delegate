@@ -17,24 +17,35 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v4
+    
+    - uses: pnpm/action-setup@v2
+      with:
+        version: 8
+
     - uses: actions/setup-node@v4
       with:
         node-version: lts/*
         cache: 'pnpm'
+
     - name: Install dependencies
-      run: npm install -g pnpm && pnpm install
+      run: pnpm install --frozen-lockfile
+
     - name: Install Playwright Browsers
       run: pnpm exec playwright install --with-deps
+
     - name: Install wait-on
       run: npm install -g wait-on
+
     - name: Start web application and wait
       working-directory: ./apps/web
       run: |
         pnpm dev & # Start the dev server in background
         wait-on -t 60000 http://localhost:5173 # Wait for up to 60 seconds for the server to respond
+
     - name: Run Playwright tests
       working-directory: ./apps/web
       run: pnpm exec playwright test
+
     - uses: actions/upload-artifact@v4
       if: ${{ !cancelled() }}
       with:
