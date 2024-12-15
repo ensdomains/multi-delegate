@@ -1,5 +1,41 @@
-export const ensTokenContract = {
-  address: '0xC18360217D8F7Ab5e7c516566761Ea12Ce7F9D72',
+export const contractAddresses = {
+  ensToken: {
+    1: {
+      address: '0xC18360217D8F7Ab5e7c516566761Ea12Ce7F9D72',
+      deployedBlock: 0, // TODO: add actual mainnet deployment block
+    },
+    5: {
+      address: '0x0000000000000000000000000000000000000000',
+      deployedBlock: 0, // TODO: add goerli deployment block when deployed
+    },
+    11155111: {
+      address: '0x0000000000000000000000000000000000000000',
+      deployedBlock: 0, // TODO: add sepolia deployment block when deployed
+    },
+  },
+  erc20MultiDelegate: {
+    1: {
+      address: '0x439253e0b11e884201bf1e3268442a4fa75f9cfe',
+      deployedBlock: 20921246,
+    },
+    5: {
+      address: '0x0000000000000000000000000000000000000000',
+      deployedBlock: 0, // TODO: add goerli deployment block when deployed
+    },
+    11155111: {
+      address: '0x0000000000000000000000000000000000000000',
+      deployedBlock: 0, // TODO: add sepolia deployment block when deployed
+    },
+  },
+} as const
+
+export const getContractAddress = (chainId: number, contract: keyof typeof contractAddresses) => {
+  const chainConfig = contractAddresses[contract][chainId as keyof (typeof contractAddresses)[typeof contract]]
+  if (!chainConfig?.address) throw new Error(`Contract ${contract} not deployed on chain ${chainId}`)
+  return chainConfig
+}
+
+export const ensTokenAbi = {
   abi: [
     {
       inputs: [
@@ -465,9 +501,7 @@ export const ensTokenContract = {
   ],
 } as const
 
-export const erc20MultiDelegateContract = {
-  address: '0x439253e0b11e884201bf1e3268442a4fa75f9cfe',
-  deployedBock: 20921246,
+export const erc20MultiDelegateAbi = {
   abi: [
     {
       inputs: [
@@ -944,3 +978,21 @@ export const erc20MultiDelegateContract = {
     },
   ],
 } as const
+
+// Create contract configs that can be used with wagmi
+export const createContractConfigs = (chainId: number) => {
+  const ensTokenConfig = getContractAddress(chainId, 'ensToken')
+  const erc20MultiDelegateConfig = getContractAddress(chainId, 'erc20MultiDelegate')
+  
+  return {
+    ensToken: {
+      address: ensTokenConfig.address,
+      abi: ensTokenAbi.abi,
+    } as const,
+    erc20MultiDelegate: {
+      address: erc20MultiDelegateConfig.address,
+      abi: erc20MultiDelegateAbi.abi,
+      deployedBlock: erc20MultiDelegateConfig.deployedBlock,
+    } as const,
+  }
+}

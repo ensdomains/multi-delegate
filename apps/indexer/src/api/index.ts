@@ -1,7 +1,8 @@
 import { graphql } from '@ponder/core'
 import { cors } from 'hono/cors'
-import { erc20MultiDelegateContract } from 'shared/contracts'
 import { createPublicClient, isAddress } from 'viem'
+import { mainnet } from 'viem/chains'
+import { createContractConfigs } from 'shared/contracts'
 
 import { ponder } from '@/generated'
 
@@ -22,9 +23,10 @@ ponder.get('/:address', async (c) => {
 
   const delegates = (await Account.findUnique({ id: address }))?.delegates || []
   const tokenIds = delegates.map((item) => BigInt(item))
+  const contracts = createContractConfigs(mainnet.id)
 
   const balanceOf = await client.readContract({
-    ...erc20MultiDelegateContract,
+    ...contracts.erc20MultiDelegate,
     functionName: 'balanceOfBatch',
     args: [new Array(tokenIds.length).fill(address), tokenIds],
   })
