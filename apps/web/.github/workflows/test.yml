@@ -1,0 +1,39 @@
+name: Test
+
+on:
+  push:
+    branches:
+      - main
+      - develop
+  pull_request:
+    branches:
+      - main
+      - develop
+
+jobs:
+  test:
+    name: Test
+    timeout-minutes: 10
+    runs-on: ubuntu-latest
+    env:
+      VITE_PUBLIC_GRAPH_URL: ${{ secrets.VITE_PUBLIC_GRAPH_URL }}
+      VITE_PUBLIC_RPC_URL: ${{ secrets.VITE_PUBLIC_RPC_URL }}
+      VITE_PUBLIC_PONDER_URL: ${{ secrets.VITE_PUBLIC_PONDER_URL }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: lts/*
+
+      - name: Install pnpm
+        run: npm install -g pnpm
+
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: Run tests
+        run: cd apps/web && pnpm test

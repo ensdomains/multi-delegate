@@ -1,45 +1,66 @@
-name: Deploy Production
+name: Cloudflare Pages
 
-on:
-  push:
-    branches:
-      - main
-    paths:
-      - 'apps/web/**'
+env:
+  VITE_PUBLIC_GRAPH_URL: ${{ secrets.VITE_PUBLIC_GRAPH_URL }}
+  VITE_PUBLIC_RPC_URL: ${{ secrets.VITE_PUBLIC_RPC_URL }}
+  VITE_PUBLIC_PONDER_URL: ${{ secrets.VITE_PUBLIC_PONDER_URL }}
+
+on: [push]
 
 jobs:
-  deploy:
-    name: Deploy to Production
+  yalc_check:
     runs-on: ubuntu-latest
-    environment: production
-
+    outputs:
+      can_deploy: ${{ steps.has_yalc.conclusion == 'success' }}
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install Yalc
+        run: npm i -g yalc
+
+      - id: has_yalc
+        run: |
+          ! yalc check | grep -qe .
+
+  deploy:
+    if: ${{ always() }}
+    runs-on: ubuntu-latest
+    needs: [yalc_check]
+    permissions:
+      contents: read
+      deployments: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Check Yalc
+        if: ${{ github.ref == 'refs/heads/main' || github.ref == 'refs/heads/dev' }}
+        run: if [ ${{ needs.yalc_check.outputs.can_deploy }} != true ]; then exit 1; else exit 0; fi
+
+      - name: Install pnpm
+        run: npm install -g pnpm
 
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
           node-version: lts/*
+          cache: 'pnpm'
 
-      - name: Install pnpm
-        run: npm install -g pnpm
-
-      - name: Install Dependencies
-        run: pnpm install
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
 
       - name: Build
         run: cd apps/web && pnpm build
-        env:
-          NEXT_PUBLIC_ALCHEMY_KEY: ${{ secrets.NEXT_PUBLIC_ALCHEMY_KEY }}
-          NEXT_PUBLIC_WALLET_CONNECT_ID: ${{ secrets.NEXT_PUBLIC_WALLET_CONNECT_ID }}
 
-      # Add your deployment step here based on your hosting provider
-      # For example, if using Vercel:
-      - name: Deploy to Vercel
-        uses: amondnet/vercel-action@v25
+      - name: Publish to Cloudflare Pages
+        uses: cloudflare/wrangler-action@v3
         with:
-          vercel-token: ${{ secrets.VERCEL_TOKEN }}
-          vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
-          vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}
-          vercel-args: '--prod'
-          working-directory: ./apps/web
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          wranglerVersion: 'v3.57.1'
+          command: pages deploy --project-name=ens-multi-delegate ./apps/web/dist
+          secrets: |
+            GITHUB_TOKEN
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

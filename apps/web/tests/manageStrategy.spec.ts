@@ -27,6 +27,7 @@ test('get started link', async ({ page, login, homePage }) => {
   await page.waitForTimeout(5000)
   const balance = await page
     .getByTestId('delegate-amount-input')
+    .nth(1)
     .getAttribute('value')
   expect(balance).not.toBe('0')
 
