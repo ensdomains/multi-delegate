@@ -3,8 +3,7 @@ name: Test
 on:
   push:
     branches:
-      - main
-      - develop
+      - '**'  # Run on all branches
   pull_request:
     branches:
       - main
