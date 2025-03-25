@@ -4,6 +4,7 @@ import {
   Dialog,
   Heading,
   PlusSVG,
+  RightArrowSVG,
   Spinner,
   Typography,
 } from '@ensdomains/thorin'
@@ -133,7 +134,7 @@ export function Manage() {
     navigate('/strategy')
   }
 
-  function handleUpdate() {
+  function handleMultiDelegate() {
     if (!address) return
 
     if (allocatedDelegates.map((del) => del[0]).includes(address)) {
@@ -366,6 +367,19 @@ export function Manage() {
           >
             Add delegate
           </Button>
+
+          {/* <Button
+            prefix={<PlusSVG />}
+            onClick={() => {
+              write.writeContract({
+                ...ensTokenContract,
+                functionName: 'delegate',
+                args: [address!],
+              })
+            }}
+          >
+            Delegate all tokens natively
+          </Button> */}
         </ButtonWrapper>
 
         {receipt.isSuccess && (
@@ -452,13 +466,60 @@ export function Manage() {
       >
         <Dialog.CloseButton onClick={() => setIsConfirmationModalOpen(false)} />
 
-        <div className="w-[28rem] max-w-full text-center">
-          <Typography>
-            When you delegate your $ENS tokens they will be swapped for NFTs
-            that represent each delegate. You can swap back to your tokens
-            anytime by undelegating.
-          </Typography>
-        </div>
+        {(() => {
+          console.log({ delegatesArr, allocatedDelegates, changingDelegates })
+          console.log(
+            'new balance of first delegate',
+            allocatedDelegates[0]?.[1]?.newBalance
+          )
+
+          // 95% of token balance
+          const almostFullBalance =
+            ((delegationInfo.data?.balance ?? 0n) * 95n) / 100n
+
+          // If there's exactly one delegate AND the allocated amount is moast of the balance, present the option of native delegation
+          if (
+            2 == 2
+            // allocatedDelegates.length === 1 &&
+            // allocatedDelegates[0][1].newBalance > almostFullBalance
+          ) {
+            return (
+              <div className="flex w-[28rem] max-w-full flex-col gap-2">
+                <div className="bg-ens-blue-surface flex flex-row items-center gap-2 rounded-lg p-4">
+                  <Typography asProp="p">
+                    Delegate a portion, swapping your $ENS for NFTs that
+                    represent each delegate. You can undelegate anytime to swap
+                    back, but new $ENS won’t be delegated automatically.
+                  </Typography>
+
+                  <div>
+                    <RightArrowSVG className="text-ens-blue-dim" />
+                  </div>
+                </div>
+                <div className="bg-ens-blue-surface flex flex-row items-center gap-2 rounded-lg p-4">
+                  <Typography asProp="p">
+                    Delegate all your $ENS to one person, including any new $ENS
+                    you receive, for less gas.
+                  </Typography>
+
+                  <div>
+                    <RightArrowSVG className="text-ens-blue-dim" />
+                  </div>
+                </div>
+              </div>
+            )
+          }
+
+          return (
+            <div className="w-[28rem] max-w-full text-center">
+              <Typography asProp="p">
+                When you delegate your $ENS tokens they will be swapped for NFTs
+                that represent each delegate. You can swap back to your tokens
+                anytime by undelegating.
+              </Typography>
+            </div>
+          )
+        })()}
 
         <Dialog.Footer
           leading={
@@ -472,7 +533,7 @@ export function Manage() {
           trailing={
             <Button
               colorStyle="bluePrimary"
-              onClick={handleUpdate}
+              onClick={handleMultiDelegate}
               loading={receipt.isLoading}
               disabled={toBeAllocated < 0n || changingDelegates.length === 0}
             >
