@@ -8,7 +8,7 @@ export default {
           blue: {
             primary: '#3889FF',
             surface: '#EEF5FF',
-            dim: '#056AFF',
+            light: '#d1e4ff',
           },
           grey: {
             primary: '#9B9BA6',

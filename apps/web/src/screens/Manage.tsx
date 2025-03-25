@@ -4,7 +4,6 @@ import {
   Dialog,
   Heading,
   PlusSVG,
-  RightArrowSVG,
   Spinner,
   Typography,
 } from '@ensdomains/thorin'
@@ -467,45 +466,50 @@ export function Manage() {
         <Dialog.CloseButton onClick={() => setIsConfirmationModalOpen(false)} />
 
         {(() => {
-          console.log({ delegatesArr, allocatedDelegates, changingDelegates })
-          console.log(
-            'new balance of first delegate',
-            allocatedDelegates[0]?.[1]?.newBalance
-          )
-
           // 95% of token balance
           const almostFullBalance =
             ((delegationInfo.data?.balance ?? 0n) * 95n) / 100n
 
           // If there's exactly one delegate AND the allocated amount is moast of the balance, present the option of native delegation
           if (
-            2 == 2
-            // allocatedDelegates.length === 1 &&
-            // allocatedDelegates[0][1].newBalance > almostFullBalance
+            allocatedDelegates.length === 1 &&
+            allocatedDelegates[0][1].newBalance > almostFullBalance
           ) {
+            const optionsClassName =
+              'bg-ens-blue-surface flex flex-row items-center gap-4 rounded-lg p-4 has-[:checked]:bg-ens-blue-light'
+
+            // Radio options to select native or multi-delegate
             return (
               <div className="flex w-[28rem] max-w-full flex-col gap-2">
-                <div className="bg-ens-blue-surface flex flex-row items-center gap-2 rounded-lg p-4">
+                <label htmlFor="native" className={optionsClassName}>
                   <Typography asProp="p">
                     Delegate a portion, swapping your $ENS for NFTs that
                     represent each delegate. You can undelegate anytime to swap
                     back, but new $ENS won’t be delegated automatically.
                   </Typography>
 
-                  <div>
-                    <RightArrowSVG className="text-ens-blue-dim" />
-                  </div>
-                </div>
-                <div className="bg-ens-blue-surface flex flex-row items-center gap-2 rounded-lg p-4">
+                  <input
+                    type="radio"
+                    className="appearance-auto"
+                    name="delegation-type"
+                    id="native"
+                    defaultChecked
+                  />
+                </label>
+
+                <label htmlFor="multi" className={optionsClassName}>
                   <Typography asProp="p">
                     Delegate all your $ENS to one person, including any new $ENS
                     you receive, for less gas.
                   </Typography>
 
-                  <div>
-                    <RightArrowSVG className="text-ens-blue-dim" />
-                  </div>
-                </div>
+                  <input
+                    type="radio"
+                    className="appearance-auto"
+                    name="delegation-type"
+                    id="multi"
+                  />
+                </label>
               </div>
             )
           }
