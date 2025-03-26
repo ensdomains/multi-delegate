@@ -54,7 +54,7 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Install Wrangler
-        run: pnpm i wrangler@latest
+        run: pnpm i -w wrangler@latest
 
       - name: Build
         run: cd apps/web && pnpm build
