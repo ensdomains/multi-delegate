@@ -5,6 +5,7 @@ import {
   Heading,
   PlusSVG,
   Spinner,
+  Toast,
   Typography,
 } from '@ensdomains/thorin'
 import { useEffect, useState } from 'react'
@@ -40,6 +41,9 @@ export function Manage() {
   const delegationInfo = useDelegationInfo(address)
   const [isSearchModalOpen, setIsSearchModalOpen] = useState(false)
   const [isConfirmationModalOpen, setIsConfirmationModalOpen] = useState(false)
+  const [delegationType, setDelegationType] = useState<'native' | 'multi'>(
+    'multi'
+  )
 
   const [delegates, setDelegates] = useState<DelegateSelection>(new Map())
   const delegatesArr = Array.from(delegates)
@@ -123,7 +127,8 @@ export function Manage() {
   useEffect(() => {
     // Refetch the delegateInfo 1s after a transaction (to let the indexer catch up)
     if (receipt.status) {
-      setTimeout(() => delegationInfo.refetch(), 1000)
+      setIsConfirmationModalOpen(false)
+      delegationInfo.refetch()
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [receipt.status])
@@ -133,11 +138,24 @@ export function Manage() {
     navigate('/strategy')
   }
 
+  function handleNativeDelegate() {
+    if (!address) return
+
+    // We will only be here if allocatedDelegates.length === 1, so it's safe to use the first
+    write.writeContract({
+      ...ensTokenContract,
+      functionName: 'delegate',
+      args: [allocatedDelegates[0][0]],
+    })
+  }
+
   function handleMultiDelegate() {
     if (!address) return
 
     if (allocatedDelegates.map((del) => del[0]).includes(address)) {
-      return alert('You cannot delegate to yourself')
+      return alert(
+        'You cannot delegate to yourself via the multi-delegate contract.'
+      )
     }
 
     const positiveChangingDelegates = changingDelegates
@@ -283,19 +301,15 @@ export function Manage() {
 
     console.log({ sources, targets, amounts })
 
-    write
-      .writeContractAsync({
-        ...erc20MultiDelegateContract,
-        functionName: 'delegateMulti',
-        args: [
-          sources.map((address) => BigInt(address)), // sources[]
-          targets.map((address) => BigInt(address)), // targets[]
-          amounts, // amounts[]
-        ],
-      })
-      .catch((e) => {
-        console.error(e)
-      })
+    write.writeContract({
+      ...erc20MultiDelegateContract,
+      functionName: 'delegateMulti',
+      args: [
+        sources.map((address) => BigInt(address)), // sources[]
+        targets.map((address) => BigInt(address)), // targets[]
+        amounts, // amounts[]
+      ],
+    })
   }
 
   return (
@@ -364,50 +378,53 @@ export function Manage() {
             prefix={<PlusSVG />}
             onClick={() => setIsSearchModalOpen(true)}
           >
-            Add delegate
+            {multiDelegates?.length === 0 && allocatedDelegates.length === 0
+              ? 'Add or change delegate'
+              : 'Add delegate'}
           </Button>
-
-          {/* <Button
-            prefix={<PlusSVG />}
-            onClick={() => {
-              write.writeContract({
-                ...ensTokenContract,
-                functionName: 'delegate',
-                args: [address!],
-              })
-            }}
-          >
-            Delegate all tokens natively
-          </Button> */}
         </ButtonWrapper>
 
-        {receipt.isSuccess && (
-          <Helper type="success" className="mx-auto">
-            Transaction success!
-          </Helper>
-        )}
+        {/* receipt.isSuccess */}
+        <Toast
+          open={receipt.isSuccess}
+          title="Transaction success!"
+          description="Your transaction has been confirmed."
+          variant="desktop"
+          onClose={() => write.reset()}
+          msToShow={7000}
+        >
+          <Button
+            as="a"
+            target="_blank"
+            href={`https://etherscan.io/tx/${write.data}`}
+            colorStyle="bluePrimary"
+          >
+            View on Etherscan
+          </Button>
+        </Toast>
 
         {receipt.isLoading && (
           <Spinner size="medium" color="blue" className="mx-auto" />
         )}
 
-        {receipt.isError && (
-          <Helper type="error">
-            <div>
-              Transaction failed. It will likely work if you try again a few
-              times. Tenderly sends a different gas estimate to the wallet each
-              time for some reason.{' '}
-              <a
-                href="https://dashboard.tenderly.co/explorer/vnet/78d3d569-cb63-45a9-8b8c-9d152d90c3ed/transactions"
-                target="_blank"
-                className="text-ens-red-primary font-bold underline"
-              >
-                See more here
-              </a>
-              .
-            </div>
-          </Helper>
-        )}
+        {/* receipt.isError */}
+        <Toast
+          open={receipt.isError}
+          title="Transaction failed!"
+          description="Your transaction has failed."
+          variant="desktop"
+          onClose={() => write.reset()}
+          msToShow={7000}
+        >
+          <Button
+            as="a"
+            target="_blank"
+            href={`https://etherscan.io/tx/${write.data}`}
+            colorStyle="redPrimary"
+          >
+            View on Etherscan
+          </Button>
+        </Toast>
 
         <ButtonWrapper>
           {(() => {
@@ -472,6 +489,8 @@ export function Manage() {
 
           // If there's exactly one delegate AND the allocated amount is moast of the balance, present the option of native delegation
           if (
+            // We can only show this if there are no existing multi-delegates, otherwise we'd need a multi-step process to reclaim tokens first
+            (multiDelegates ?? []).length === 0 &&
             allocatedDelegates.length === 1 &&
             allocatedDelegates[0][1].newBalance > almostFullBalance
           ) {
@@ -481,7 +500,7 @@ export function Manage() {
             // Radio options to select native or multi-delegate
             return (
               <div className="flex w-[28rem] max-w-full flex-col gap-2">
-                <label htmlFor="native" className={optionsClassName}>
+                <label htmlFor="multi" className={optionsClassName}>
                   <Typography asProp="p">
                     Delegate a portion, swapping your $ENS for NFTs that
                     represent each delegate. You can undelegate anytime to swap
@@ -492,12 +511,13 @@ export function Manage() {
                     type="radio"
                     className="appearance-auto"
                     name="delegation-type"
-                    id="native"
+                    id="multi"
                     defaultChecked
+                    onChange={() => setDelegationType('multi')}
                   />
                 </label>
 
-                <label htmlFor="multi" className={optionsClassName}>
+                <label htmlFor="native" className={optionsClassName}>
                   <Typography asProp="p">
                     Delegate all your $ENS to one person, including any new $ENS
                     you receive, for less gas.
@@ -507,7 +527,8 @@ export function Manage() {
                     type="radio"
                     className="appearance-auto"
                     name="delegation-type"
-                    id="multi"
+                    id="native"
+                    onChange={() => setDelegationType('native')}
                   />
                 </label>
               </div>
@@ -537,8 +558,14 @@ export function Manage() {
           trailing={
             <Button
               colorStyle="bluePrimary"
-              onClick={handleMultiDelegate}
-              loading={receipt.isLoading}
+              onClick={() => {
+                if (delegationType === 'native') {
+                  handleNativeDelegate()
+                } else {
+                  handleMultiDelegate()
+                }
+              }}
+              loading={receipt.isLoading || write.isPending}
               disabled={toBeAllocated < 0n || changingDelegates.length === 0}
             >
               Open Wallet
