@@ -477,13 +477,70 @@ export const erc20MultiDelegateContract = {
           type: 'address',
         },
         {
-          internalType: 'string',
-          name: '_metadata_uri',
-          type: 'string',
+          internalType: 'contract IUniversalResolver',
+          name: '_metadataResolver',
+          type: 'address',
         },
       ],
       stateMutability: 'nonpayable',
       type: 'constructor',
+    },
+    {
+      inputs: [
+        { internalType: 'address', name: 'sender', type: 'address' },
+        { internalType: 'uint256', name: 'balance', type: 'uint256' },
+        { internalType: 'uint256', name: 'needed', type: 'uint256' },
+        { internalType: 'uint256', name: 'tokenId', type: 'uint256' },
+      ],
+      name: 'ERC1155InsufficientBalance',
+      type: 'error',
+    },
+    {
+      inputs: [{ internalType: 'address', name: 'approver', type: 'address' }],
+      name: 'ERC1155InvalidApprover',
+      type: 'error',
+    },
+    {
+      inputs: [
+        { internalType: 'uint256', name: 'idsLength', type: 'uint256' },
+        { internalType: 'uint256', name: 'valuesLength', type: 'uint256' },
+      ],
+      name: 'ERC1155InvalidArrayLength',
+      type: 'error',
+    },
+    {
+      inputs: [{ internalType: 'address', name: 'operator', type: 'address' }],
+      name: 'ERC1155InvalidOperator',
+      type: 'error',
+    },
+    {
+      inputs: [{ internalType: 'address', name: 'receiver', type: 'address' }],
+      name: 'ERC1155InvalidReceiver',
+      type: 'error',
+    },
+    {
+      inputs: [{ internalType: 'address', name: 'sender', type: 'address' }],
+      name: 'ERC1155InvalidSender',
+      type: 'error',
+    },
+    {
+      inputs: [
+        { internalType: 'address', name: 'operator', type: 'address' },
+        { internalType: 'address', name: 'owner', type: 'address' },
+      ],
+      name: 'ERC1155MissingApprovalForAll',
+      type: 'error',
+    },
+    { inputs: [], name: 'InvalidDelegateAddress', type: 'error' },
+    {
+      inputs: [{ internalType: 'address', name: 'owner', type: 'address' }],
+      name: 'OwnableInvalidOwner',
+      type: 'error',
+    },
+    {
+      inputs: [{ internalType: 'address', name: 'account', type: 'address' }],
+      name: 'OwnableUnauthorizedAccount',
+      type: 'error',
     },
     {
       anonymous: false,
@@ -516,15 +573,16 @@ export const erc20MultiDelegateContract = {
         {
           indexed: true,
           internalType: 'address',
-          name: 'from',
+          name: 'owner',
           type: 'address',
         },
         {
           indexed: true,
           internalType: 'address',
-          name: 'to',
+          name: 'from',
           type: 'address',
         },
+        { indexed: true, internalType: 'address', name: 'to', type: 'address' },
         {
           indexed: false,
           internalType: 'uint256',
@@ -533,6 +591,14 @@ export const erc20MultiDelegateContract = {
         },
       ],
       name: 'DelegationProcessed',
+      type: 'event',
+    },
+    {
+      anonymous: false,
+      inputs: [
+        { indexed: false, internalType: 'string', name: 'uri', type: 'string' },
+      ],
+      name: 'MetadataURIUpdated',
       type: 'event',
     },
     {
@@ -588,12 +654,7 @@ export const erc20MultiDelegateContract = {
           name: 'from',
           type: 'address',
         },
-        {
-          indexed: true,
-          internalType: 'address',
-          name: 'to',
-          type: 'address',
-        },
+        { indexed: true, internalType: 'address', name: 'to', type: 'address' },
         {
           indexed: false,
           internalType: 'uint256[]',
@@ -625,12 +686,7 @@ export const erc20MultiDelegateContract = {
           name: 'from',
           type: 'address',
         },
-        {
-          indexed: true,
-          internalType: 'address',
-          name: 'to',
-          type: 'address',
-        },
+        { indexed: true, internalType: 'address', name: 'to', type: 'address' },
         {
           indexed: false,
           internalType: 'uint256',
@@ -656,81 +712,36 @@ export const erc20MultiDelegateContract = {
           name: 'value',
           type: 'string',
         },
-        {
-          indexed: true,
-          internalType: 'uint256',
-          name: 'id',
-          type: 'uint256',
-        },
+        { indexed: true, internalType: 'uint256', name: 'id', type: 'uint256' },
       ],
       name: 'URI',
       type: 'event',
     },
     {
       inputs: [
-        {
-          internalType: 'address',
-          name: 'account',
-          type: 'address',
-        },
-        {
-          internalType: 'uint256',
-          name: 'id',
-          type: 'uint256',
-        },
+        { internalType: 'address', name: 'account', type: 'address' },
+        { internalType: 'uint256', name: 'id', type: 'uint256' },
       ],
       name: 'balanceOf',
-      outputs: [
-        {
-          internalType: 'uint256',
-          name: '',
-          type: 'uint256',
-        },
-      ],
+      outputs: [{ internalType: 'uint256', name: '', type: 'uint256' }],
       stateMutability: 'view',
       type: 'function',
     },
     {
       inputs: [
-        {
-          internalType: 'address[]',
-          name: 'accounts',
-          type: 'address[]',
-        },
-        {
-          internalType: 'uint256[]',
-          name: 'ids',
-          type: 'uint256[]',
-        },
+        { internalType: 'address[]', name: 'accounts', type: 'address[]' },
+        { internalType: 'uint256[]', name: 'ids', type: 'uint256[]' },
       ],
       name: 'balanceOfBatch',
-      outputs: [
-        {
-          internalType: 'uint256[]',
-          name: '',
-          type: 'uint256[]',
-        },
-      ],
+      outputs: [{ internalType: 'uint256[]', name: '', type: 'uint256[]' }],
       stateMutability: 'view',
       type: 'function',
     },
     {
       inputs: [
-        {
-          internalType: 'uint256[]',
-          name: 'sources',
-          type: 'uint256[]',
-        },
-        {
-          internalType: 'uint256[]',
-          name: 'targets',
-          type: 'uint256[]',
-        },
-        {
-          internalType: 'uint256[]',
-          name: 'amounts',
-          type: 'uint256[]',
-        },
+        { internalType: 'uint256[]', name: 'sources', type: 'uint256[]' },
+        { internalType: 'uint256[]', name: 'targets', type: 'uint256[]' },
+        { internalType: 'uint256[]', name: 'amounts', type: 'uint256[]' },
       ],
       name: 'delegateMulti',
       outputs: [],
@@ -739,23 +750,22 @@ export const erc20MultiDelegateContract = {
     },
     {
       inputs: [
-        {
-          internalType: 'address',
-          name: 'account',
-          type: 'address',
-        },
-        {
-          internalType: 'address',
-          name: 'operator',
-          type: 'address',
-        },
+        { internalType: 'address', name: 'account', type: 'address' },
+        { internalType: 'address', name: 'operator', type: 'address' },
       ],
       name: 'isApprovedForAll',
+      outputs: [{ internalType: 'bool', name: '', type: 'bool' }],
+      stateMutability: 'view',
+      type: 'function',
+    },
+    {
+      inputs: [],
+      name: 'metadataResolver',
       outputs: [
         {
-          internalType: 'bool',
+          internalType: 'contract IUniversalResolver',
           name: '',
-          type: 'bool',
+          type: 'address',
         },
       ],
       stateMutability: 'view',
@@ -764,13 +774,7 @@ export const erc20MultiDelegateContract = {
     {
       inputs: [],
       name: 'owner',
-      outputs: [
-        {
-          internalType: 'address',
-          name: '',
-          type: 'address',
-        },
-      ],
+      outputs: [{ internalType: 'address', name: '', type: 'address' }],
       stateMutability: 'view',
       type: 'function',
     },
@@ -783,31 +787,11 @@ export const erc20MultiDelegateContract = {
     },
     {
       inputs: [
-        {
-          internalType: 'address',
-          name: 'from',
-          type: 'address',
-        },
-        {
-          internalType: 'address',
-          name: 'to',
-          type: 'address',
-        },
-        {
-          internalType: 'uint256[]',
-          name: 'ids',
-          type: 'uint256[]',
-        },
-        {
-          internalType: 'uint256[]',
-          name: 'amounts',
-          type: 'uint256[]',
-        },
-        {
-          internalType: 'bytes',
-          name: 'data',
-          type: 'bytes',
-        },
+        { internalType: 'address', name: 'from', type: 'address' },
+        { internalType: 'address', name: 'to', type: 'address' },
+        { internalType: 'uint256[]', name: 'ids', type: 'uint256[]' },
+        { internalType: 'uint256[]', name: 'values', type: 'uint256[]' },
+        { internalType: 'bytes', name: 'data', type: 'bytes' },
       ],
       name: 'safeBatchTransferFrom',
       outputs: [],
@@ -816,31 +800,11 @@ export const erc20MultiDelegateContract = {
     },
     {
       inputs: [
-        {
-          internalType: 'address',
-          name: 'from',
-          type: 'address',
-        },
-        {
-          internalType: 'address',
-          name: 'to',
-          type: 'address',
-        },
-        {
-          internalType: 'uint256',
-          name: 'id',
-          type: 'uint256',
-        },
-        {
-          internalType: 'uint256',
-          name: 'amount',
-          type: 'uint256',
-        },
-        {
-          internalType: 'bytes',
-          name: 'data',
-          type: 'bytes',
-        },
+        { internalType: 'address', name: 'from', type: 'address' },
+        { internalType: 'address', name: 'to', type: 'address' },
+        { internalType: 'uint256', name: 'id', type: 'uint256' },
+        { internalType: 'uint256', name: 'value', type: 'uint256' },
+        { internalType: 'bytes', name: 'data', type: 'bytes' },
       ],
       name: 'safeTransferFrom',
       outputs: [],
@@ -849,16 +813,8 @@ export const erc20MultiDelegateContract = {
     },
     {
       inputs: [
-        {
-          internalType: 'address',
-          name: 'operator',
-          type: 'address',
-        },
-        {
-          internalType: 'bool',
-          name: 'approved',
-          type: 'bool',
-        },
+        { internalType: 'address', name: 'operator', type: 'address' },
+        { internalType: 'bool', name: 'approved', type: 'bool' },
       ],
       name: 'setApprovalForAll',
       outputs: [],
@@ -868,32 +824,20 @@ export const erc20MultiDelegateContract = {
     {
       inputs: [
         {
-          internalType: 'string',
-          name: 'uri',
-          type: 'string',
+          internalType: 'contract IUniversalResolver',
+          name: '_newResolver',
+          type: 'address',
         },
       ],
-      name: 'setUri',
+      name: 'setMetadataResolver',
       outputs: [],
       stateMutability: 'nonpayable',
       type: 'function',
     },
     {
-      inputs: [
-        {
-          internalType: 'bytes4',
-          name: 'interfaceId',
-          type: 'bytes4',
-        },
-      ],
+      inputs: [{ internalType: 'bytes4', name: 'interfaceId', type: 'bytes4' }],
       name: 'supportsInterface',
-      outputs: [
-        {
-          internalType: 'bool',
-          name: '',
-          type: 'bool',
-        },
-      ],
+      outputs: [{ internalType: 'bool', name: '', type: 'bool' }],
       stateMutability: 'view',
       type: 'function',
     },
@@ -901,44 +845,29 @@ export const erc20MultiDelegateContract = {
       inputs: [],
       name: 'token',
       outputs: [
-        {
-          internalType: 'contract ERC20Votes',
-          name: '',
-          type: 'address',
-        },
+        { internalType: 'contract ERC20Votes', name: '', type: 'address' },
       ],
       stateMutability: 'view',
       type: 'function',
     },
     {
-      inputs: [
-        {
-          internalType: 'address',
-          name: 'newOwner',
-          type: 'address',
-        },
-      ],
+      inputs: [{ internalType: 'uint256', name: 'tokenId', type: 'uint256' }],
+      name: 'tokenURI',
+      outputs: [{ internalType: 'string', name: '', type: 'string' }],
+      stateMutability: 'view',
+      type: 'function',
+    },
+    {
+      inputs: [{ internalType: 'address', name: 'newOwner', type: 'address' }],
       name: 'transferOwnership',
       outputs: [],
       stateMutability: 'nonpayable',
       type: 'function',
     },
     {
-      inputs: [
-        {
-          internalType: 'uint256',
-          name: '',
-          type: 'uint256',
-        },
-      ],
+      inputs: [{ internalType: 'uint256', name: '', type: 'uint256' }],
       name: 'uri',
-      outputs: [
-        {
-          internalType: 'string',
-          name: '',
-          type: 'string',
-        },
-      ],
+      outputs: [{ internalType: 'string', name: '', type: 'string' }],
       stateMutability: 'view',
       type: 'function',
     },
