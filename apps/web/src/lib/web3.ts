@@ -2,11 +2,15 @@ import { getDefaultWallets } from '@rainbow-me/rainbowkit'
 import { createConfig, http } from 'wagmi'
 import { mainnet } from 'wagmi/chains'
 
-import { RPC_URL } from './env'
+import { REOWN_PROJECT_ID, RPC_URL } from './env'
+
+if (!REOWN_PROJECT_ID) {
+  throw new Error('REOWN_PROJECT_ID is not set')
+}
 
 const { connectors } = getDefaultWallets({
-  appName: 'Multi-Delegate',
-  projectId: 'd6c989fb5e87a19a4c3c14412d5a7672',
+  appName: 'ENS Delegation Manager',
+  projectId: REOWN_PROJECT_ID,
 })
 
 const chains = [mainnet] as const
