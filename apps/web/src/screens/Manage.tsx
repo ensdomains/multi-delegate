@@ -434,7 +434,7 @@ export function Manage() {
             if (!hasSufficientAllowance) {
               return (
                 <Button
-                  disabled={!requiredRebalanceAllowance}
+                  disabled={!requiredRebalanceAllowance || receipt.isLoading}
                   onClick={() => {
                     write.writeContract({
                       ...ensTokenContract,
