@@ -56,6 +56,9 @@ jobs:
       - name: Build
         run: cd apps/web && pnpm build
 
+      - name: Install Wrangler
+        run: pnpm i -g wrangler@latest
+
       - name: Publish to Cloudflare Pages
         uses: cloudflare/wrangler-action@v3
         with:
