@@ -5,7 +5,7 @@ import { mainnet } from 'wagmi/chains'
 import { REOWN_PROJECT_ID, RPC_URL } from './env'
 
 if (!REOWN_PROJECT_ID) {
-  throw new Error('REOWN_PROJECT_ID is not set')
+  throw new Error('VITE_PUBLIC_REOWN_PROJECT_ID is not set')
 }
 
 const { connectors } = getDefaultWallets({
