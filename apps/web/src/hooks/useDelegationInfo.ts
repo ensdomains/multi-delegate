@@ -99,13 +99,15 @@ async function getDelegatesFromEventLogs(
     toBlock: 'latest',
   })
 
-  const transferSingleLogs = _transferSingleLogs.map((log) => ({
-    ...log,
-    args: {
-      ...log.args,
-      ids: [log.args.id!],
-    },
-  }))
+  const transferSingleLogs = _transferSingleLogs
+    .filter((log) => !!log.args.id)
+    .map((log) => ({
+      ...log,
+      args: {
+        ...log.args,
+        ids: [log.args.id!],
+      },
+    }))
 
   const logs = [...transferBatchedLogs, ...transferSingleLogs]
 
