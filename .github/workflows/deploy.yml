@@ -39,8 +39,11 @@ jobs:
         if: ${{ github.ref == 'refs/heads/main' || github.ref == 'refs/heads/dev' }}
         run: if [ ${{ needs.yalc_check.outputs.can_deploy }} != true ]; then exit 1; else exit 0; fi
 
+      - name: Install corepack
+        run:  npm i -g corepack
+
       - name: Install pnpm
-        run: npm install -g pnpm
+        run: npm i -g --force corepack && corepack enable pnpm
 
       - name: Install Node.js
         uses: actions/setup-node@v3
@@ -51,6 +54,9 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      - name: Install Wrangler
+        run: pnpm i -w wrangler@v4.4.1
+
       - name: Build
         run: cd apps/web && pnpm build
 
@@ -59,7 +65,7 @@ jobs:
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          wranglerVersion: 'v3.57.1'
+          wranglerVersion: 'v4.4.1'
           command: pages deploy --project-name=ens-multi-delegate
           secrets: |
             GITHUB_TOKEN

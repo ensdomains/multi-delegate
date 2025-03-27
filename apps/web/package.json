@@ -9,7 +9,8 @@
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "preview": "vite preview",
     "test": "vitest",
-    "test:coverage": "vitest run --coverage"
+    "test:coverage": "vitest run --coverage",
+    "deploy": "wrangler pages deploy --project-name=ens-multi-delegate"
   },
   "dependencies": {
     "@ensdomains/thorin": "^0.6.45",
@@ -51,6 +52,7 @@
     "tailwindcss": "^3.4.1",
     "typescript": "^5.2.2",
     "vite": "^5.0.8",
-    "vitest": "^2.1.2"
+    "vitest": "^2.1.2",
+    "wrangler": "^4.4.1"
   }
 }
