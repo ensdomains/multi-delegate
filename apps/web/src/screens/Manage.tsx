@@ -104,7 +104,6 @@ export function Manage() {
 
   // Set the initial delegates
   useEffect(() => {
-    if (!multiDelegates) return
     const { multiDelegates: _multiDelegates } = delegationInfo.data ?? {}
     if (_multiDelegates) {
       // convert multiDelegate.data to a Map and set it as the initial delegates
