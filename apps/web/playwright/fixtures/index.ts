@@ -3,7 +3,6 @@ import {
   injectHeadlessWeb3Provider,
 } from '@ensdomains/headless-web3-provider'
 import { test as base } from '@playwright/test'
-import { erc20MultiDelegateContract } from 'shared/contracts'
 import { defineChain } from 'viem'
 
 import { HomePage } from '../pages/homePage'
@@ -39,7 +38,10 @@ const tenderly = defineChain({
     },
   },
   contracts: {
-    erc20MultiDelegateContract,
+    erc20MultiDelegateContract: {
+      address: '0x68c1E1f76f2564D886f24b28de6dC53F5078BDa9',
+      blockCreated: 22133176,
+    },
   },
 })
 
