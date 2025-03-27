@@ -105,26 +105,24 @@ export function Manage() {
   // Set the initial delegates
   useEffect(() => {
     if (!multiDelegates) return
-    const { multiDelegates: _multiDelegates } = delegationInfo.data ?? {}
-    if (_multiDelegates) {
-      // convert multiDelegate.data to a Map and set it as the initial delegates
-      setDelegates(
-        new Map(
-          _multiDelegates?.map(
-            (delegate) =>
-              [
-                delegate.delegate,
-                {
-                  preExistingBalance: BigInt(delegate.amount),
-                  newBalance: BigInt(delegate.amount),
-                },
-                // formatUnits(BigInt(delegate.amount), 18),
-              ] as const
-          )
+
+    // convert multiDelegate.data to a Map and set it as the initial delegates
+    setDelegates(
+      new Map(
+        multiDelegates?.map(
+          (delegate) =>
+            [
+              delegate.delegate,
+              {
+                preExistingBalance: BigInt(delegate.amount),
+                newBalance: BigInt(delegate.amount),
+              },
+              // formatUnits(BigInt(delegate.amount), 18),
+            ] as const
         )
       )
-    }
-  }, [delegationInfo.data])
+    )
+  }, [multiDelegates])
 
   useEffect(() => {
     // Refetch the delegateInfo 1s after a transaction (to let the indexer catch up)
