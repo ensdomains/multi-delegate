@@ -27,12 +27,12 @@ test('get started link', async ({ page, login, homePage }) => {
   await page.waitForTimeout(5000)
   const balance = await page
     .getByTestId('delegate-amount-input')
-    .nth(1)
+    .nth(0)
     .getAttribute('value')
   expect(balance).not.toBe('0')
 
   // Manage the strategy
-  await page.click('text=Add delegate')
+  await page.click('text=Add or change delegate')
 
   //enter "leonardo" in the input field which has placeholder as "ENS name or Ethereum address"
   await page.fill(
