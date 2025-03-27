@@ -27,20 +27,20 @@ const tenderly = defineChain({
   rpcUrls: {
     default: {
       http: [
-        'https://virtual.mainnet.rpc.tenderly.co/c5b762a9-addb-468c-ad6a-f11c0df62605',
+        'https://virtual.mainnet.rpc.tenderly.co/42ae08fb-9b54-410b-8c4a-e9ad3334b8ee',
       ],
     },
   },
   blockExplorers: {
     default: {
       name: 'Explorer',
-      url: 'https://virtual.mainnet.rpc.tenderly.co/c5b762a9-addb-468c-ad6a-f11c0df62605',
+      url: 'https://virtual.mainnet.rpc.tenderly.co/42ae08fb-9b54-410b-8c4a-e9ad3334b8ee',
     },
   },
   contracts: {
     erc20MultiDelegateContract: {
-      address: '0x439253e0b11e884201bf1e3268442a4fa75f9cfe',
-      blockCreated: 20921246,
+      address: '0x3CA5CCC96648d016D41c5aF40eED82202BD019cc',
+      blockCreated: 22140079,
     },
   },
 })

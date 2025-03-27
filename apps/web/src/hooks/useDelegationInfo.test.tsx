@@ -11,6 +11,7 @@ vi.mock('wagmi')
 vi.mock('../lib/env', () => ({
   PONDER_URL: null,
   RPC_URL: 'http://localhost:8545',
+  REOWN_PROJECT_ID: 'swag',
 }))
 
 // Mock contracts

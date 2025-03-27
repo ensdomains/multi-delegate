@@ -3,8 +3,9 @@ export const GRAPH_URL =
   'https://api.thegraph.com/subgraphs/name/ensdomains/ens'
 
 export const RPC_URL =
-  import.meta.env.VITE_PUBLIC_RPC_URL ||
-  'https://virtual.mainnet.rpc.tenderly.co/c5b762a9-addb-468c-ad6a-f11c0df62605'
+  import.meta.env.VITE_PUBLIC_RPC_URL || 'https://ethereum-rpc.publicnode.com'
 
-export const PONDER_URL =
-  (import.meta.env.VITE_PUBLIC_PONDER_URL as string) || undefined
+export const PONDER_URL = import.meta.env.VITE_PUBLIC_PONDER_URL
+
+export const REOWN_PROJECT_ID =
+  (import.meta.env.VITE_PUBLIC_REOWN_PROJECT_ID as string) || ''

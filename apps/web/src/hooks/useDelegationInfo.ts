@@ -63,7 +63,6 @@ export function useDelegationInfo(address?: Address | null) {
 }
 
 async function getDelegatesFromIndexer(address: Address) {
-  // @ts-expect-error: This function is not called unless PONDER_URL is defined
   const response = await fetch(`${new URL(PONDER_URL).origin}/${address}`)
   const data = await response.json()
 
@@ -80,15 +79,37 @@ async function getDelegatesFromEventLogs(
   client: PublicClient,
   address: Address
 ): Promise<DelegateApiResponse[]> {
-  const logs = await client.getLogs({
+  const transferBatchedLogs = await client.getLogs({
     address: erc20MultiDelegateContract.address,
-    event: erc20MultiDelegateContract.abi[5],
+    event: erc20MultiDelegateContract.abi[16],
     args: {
       to: address,
     },
     fromBlock: BigInt(erc20MultiDelegateContract.deployedBock),
     toBlock: 'latest',
   })
+
+  const _transferSingleLogs = await client.getLogs({
+    address: erc20MultiDelegateContract.address,
+    event: erc20MultiDelegateContract.abi[17],
+    args: {
+      to: address,
+    },
+    fromBlock: BigInt(erc20MultiDelegateContract.deployedBock),
+    toBlock: 'latest',
+  })
+
+  const transferSingleLogs = _transferSingleLogs
+    .filter((log) => !!log.args.id)
+    .map((log) => ({
+      ...log,
+      args: {
+        ...log.args,
+        ids: [log.args.id!],
+      },
+    }))
+
+  const logs = [...transferBatchedLogs, ...transferSingleLogs]
 
   const _tokenIds = new Set(logs.map((log) => log.args.ids!).flat())
   const tokenIds = Array.from(_tokenIds)

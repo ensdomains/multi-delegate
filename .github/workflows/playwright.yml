@@ -1,14 +1,15 @@
 name: Playwright Tests
 on:
   push:
-    branches: [ '**' ]  # Run on all branches
+    branches: ['**'] # Run on all branches
   pull_request:
-    branches: [ main, master ]
+    branches: [main, master]
 
 env:
   VITE_PUBLIC_GRAPH_URL: ${{ secrets.VITE_PUBLIC_GRAPH_URL }}
   VITE_PUBLIC_RPC_URL: ${{ secrets.VITE_PUBLIC_RPC_URL }}
   VITE_PUBLIC_PONDER_URL: ${{ secrets.VITE_PUBLIC_PONDER_URL }}
+  VITE_PUBLIC_REOWN_PROJECT_ID: ${{ secrets.VITE_PUBLIC_REOWN_PROJECT_ID }}
   SECRET_WORDS: ${{ secrets.SECRET_WORDS }}
 
 jobs:

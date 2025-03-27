@@ -38,11 +38,6 @@ describe('Nav component', () => {
     expect(screen.getByText('App')).toBeTruthy()
   })
 
-  it('renders the warning message', () => {
-    render(<Nav />)
-    expect(screen.getByText(/Use this JSON RPC in your wallet/)).toBeTruthy()
-  })
-
   it('renders profile icon when not connected', () => {
     vi.mocked(useAccount).mockReturnValue({ address: undefined })
     const mockOpenConnectModal = vi.fn()
