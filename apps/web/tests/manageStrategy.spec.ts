@@ -23,13 +23,17 @@ test('get started link', async ({ page, login, homePage }) => {
   //Click the "Manage strategy" button.
   await page.click('text=Manage strategy')
 
-  //get the balance of the user
-  await page.waitForTimeout(5000)
-  const balance = await page
-    .getByTestId('delegate-amount-input')
-    .nth(0)
-    .getAttribute('value')
-  expect(balance).not.toBe('0')
+  // Wait for the delegate amount input to appear and have a value loaded
+  const delegateInput = page.getByTestId('delegate-amount-input').nth(0)
+  await expect(delegateInput).toBeVisible()
+
+  // Wait for the value to be populated (keep checking until it has any value)
+  await expect(async () => {
+    const value = await delegateInput.getAttribute('value')
+    expect(value).not.toBe('0')
+    expect(value).not.toBe('')
+    expect(value).not.toBe(null)
+  }).toPass({ timeout: 10000 })
 
   // Manage the strategy
   await page.click('text=Add or change delegate')
