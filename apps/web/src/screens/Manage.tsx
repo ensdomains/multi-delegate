@@ -570,7 +570,11 @@ export function Manage() {
                 }
               }}
               loading={receipt.isLoading || write.isPending}
-              disabled={toBeAllocated < 0n || changingDelegates.length === 0 || write.isPending}
+              disabled={
+                toBeAllocated < 0n ||
+                changingDelegates.length === 0 ||
+                write.isPending
+              }
             >
               Open Wallet
             </Button>
