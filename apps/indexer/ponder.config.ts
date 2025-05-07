@@ -1,4 +1,4 @@
-import { createConfig } from '@ponder/core'
+import { createConfig } from 'ponder'
 import { erc20MultiDelegateContract } from 'shared/contracts'
 import { http } from 'viem'
 

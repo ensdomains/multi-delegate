@@ -1,4 +1,4 @@
-import { createSchema } from '@ponder/core'
+import { onchainTable } from 'ponder'
 
 /* 
 I want to be able to query the following:
@@ -37,31 +37,29 @@ last option is a custom GET endpoint that returns something like this:
 ]
 */
 
-export default createSchema((p) => ({
-  Account: p.createTable({
-    id: p.hex(),
-    delegates: p.hex().list(),
-  }),
+export const Account = onchainTable('Account',(p: any) => ({
+  id: p.hex().primaryKey(),
+  delegates: p.hex().array(),
+}));
 
-  DelegationProcessedEvent: p.createTable({
-    id: p.string(),
-    from: p.hex(),
-    to: p.hex(),
-    amount: p.bigint(),
-  }),
+export const DelegationProcessedEvent = onchainTable('DelegationProcessedEvent',(p: any) => ({
+  id: p.text().primaryKey(),
+  from: p.hex(),
+  to: p.hex(),
+  amount: p.bigint(),
+}));
 
-  ProxyDeployedEvent: p.createTable({
-    id: p.string(),
+export const  ProxyDeployedEvent = onchainTable('ProxyDeployedEvent',(p: any) => ({
+    id: p.text().primaryKey(),
     delegate: p.hex(),
     proxyAddress: p.hex(),
-  }),
+}));
 
-  TransferBatchEvent: p.createTable({
-    id: p.string(),
-    operator: p.hex(),
-    from: p.hex(),
-    to: p.hex(),
-    ids: p.bigint().list(),
-    values: p.bigint().list(),
-  }),
-}))
+export const  TransferBatchEvent = onchainTable('TransferBatchEvent',(p: any) => ({
+  id: p.text().primaryKey(),
+  operator: p.hex(),
+  from: p.hex(),
+  to: p.hex(),
+  ids: p.bigint().array(),
+  values: p.bigint().array(),
+}));
