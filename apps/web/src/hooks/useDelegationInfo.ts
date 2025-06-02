@@ -79,9 +79,10 @@ async function getDelegatesFromEventLogs(
   client: PublicClient,
   address: Address
 ): Promise<DelegateApiResponse[]> {
-  const transferBatchedLogs = await client.getLogs({
+  const transferBatchedFilter = await client.createContractEventFilter({
     address: erc20MultiDelegateContract.address,
-    event: erc20MultiDelegateContract.abi[16],
+    abi: erc20MultiDelegateContract.abi,
+    eventName: 'TransferBatch',
     args: {
       to: address,
     },
@@ -89,14 +90,23 @@ async function getDelegatesFromEventLogs(
     toBlock: 'latest',
   })
 
-  const _transferSingleLogs = await client.getLogs({
+  const transferBatchedLogs = await client.getFilterLogs({
+    filter: transferBatchedFilter,
+  })
+
+  const transferSingleFilter = await client.createContractEventFilter({
     address: erc20MultiDelegateContract.address,
-    event: erc20MultiDelegateContract.abi[17],
+    abi: erc20MultiDelegateContract.abi,
+    eventName: 'TransferSingle',
     args: {
       to: address,
     },
     fromBlock: BigInt(erc20MultiDelegateContract.deployedBock),
     toBlock: 'latest',
+  })
+
+  const _transferSingleLogs = await client.getFilterLogs({
+    filter: transferSingleFilter,
   })
 
   const transferSingleLogs = _transferSingleLogs

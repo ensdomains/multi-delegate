@@ -28,8 +28,9 @@ describe('useDelegationInfo', () => {
   const mockAddress: Address = '0x1234567890123456789012345678901234567890'
   const mockPublicClient = {
     multicall: vi.fn(),
-    getLogs: vi.fn(),
     readContract: vi.fn(),
+    createContractEventFilter: vi.fn(),
+    getFilterLogs: vi.fn(),
   } as unknown as PublicClient
 
   beforeEach(() => {
@@ -56,7 +57,7 @@ describe('useDelegationInfo', () => {
       { result: BigInt(500) },
     ]
     mockPublicClient.multicall.mockResolvedValue(mockMulticallResult)
-    mockPublicClient.getLogs.mockResolvedValue([])
+    mockPublicClient.getFilterLogs.mockResolvedValue([])
 
     const { result } = renderHook(() => useDelegationInfo(mockAddress))
     const resolvedResult = await result.current.data()
@@ -78,7 +79,7 @@ describe('useDelegationInfo', () => {
       { result: BigInt(500) },
     ]
     mockPublicClient.multicall.mockResolvedValue(mockMulticallResult)
-    mockPublicClient.getLogs.mockResolvedValue([])
+    mockPublicClient.getFilterLogs.mockResolvedValue([])
 
     const { result } = renderHook(() => useDelegationInfo(mockAddress))
     const resolvedResult = await result.current.data()
@@ -100,7 +101,7 @@ describe('useDelegationInfo', () => {
       { result: BigInt(500) },
     ]
     mockPublicClient.multicall.mockResolvedValue(mockMulticallResult)
-    mockPublicClient.getLogs.mockResolvedValue([
+    mockPublicClient.getFilterLogs.mockResolvedValue([
       { args: { ids: [BigInt(1), BigInt(2)] } },
     ])
     mockPublicClient.readContract.mockResolvedValue([BigInt(100), BigInt(200)])
