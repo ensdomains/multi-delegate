@@ -110,9 +110,13 @@ export function SearchModal({
             )
           }
 
-          return search.data?.map(({ name }, index) => (
-            <div key={name} className="w-full">
-              <SearchResult name={name} addDelegate={addDelegate} />
+          return search.data?.map(({ name, address }, index) => (
+            <div key={name || address} className="w-full">
+              <SearchResult
+                name={name}
+                address={address}
+                addDelegate={addDelegate}
+              />
 
               {/* If its not the last delegate, add a divider */}
               {index !== search.data.length - 1 && <Divider />}
