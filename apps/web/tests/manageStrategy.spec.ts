@@ -32,7 +32,7 @@ test('get started link', async ({ page, login, homePage }) => {
   expect(balance).not.toBe('0')
 
   // Manage the strategy
-  await page.click('text=Add or change delegate')
+  await page.click('text=Add delegate')
 
   //enter "leonardo" in the input field which has placeholder as "ENS name or Ethereum address"
   await page.fill(
