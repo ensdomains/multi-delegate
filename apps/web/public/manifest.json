@@ -4,5 +4,12 @@
   "theme_color": "#5298FF",
   "background_color": "#F6F6F6",
   "display": "standalone",
-  "description": "ENS Multi-Delegate App"
+  "description": "ENS Multi-Delegate App",
+  "icons": [
+    {
+      "src": "https://ens.domains/favicon.png",
+      "sizes": "64x64 32x32 24x24 16x16", 
+      "type": "image/png"
+    }
+  ]
 }
