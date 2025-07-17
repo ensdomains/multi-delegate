@@ -1,0 +1,2 @@
+/*
+  Content-Security-Policy: default-src 'self' https://delegate.ens.domains https://*.multi-delegate.pages.dev https://multi-delegate.pages.dev; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com https://fonts.googleapis.com; object-src 'none'; frame-src 'self' https://verify.walletconnect.com https://verify.walletconnect.org; frame-ancestors 'self' https://app.safe.global; connect-src 'self' *; img-src 'self' data: blob: *;
