@@ -1,65 +1,45 @@
 import { onchainTable } from 'ponder'
 
-/* 
-I want to be able to query the following:
+export const Account = onchainTable('Account', (t) => ({
+  id: t.hex().primaryKey(),
+  delegates: t.hex().array().notNull(),
+}))
 
-{
-  account ("0x123") {
-    delegates {
-      id
-      amount
-    }
-  }
-}
+export const DelegationProcessedEvent = onchainTable(
+  'DelegationProcessedEvent',
+  (t) => ({
+    id: t.text().primaryKey(),
+    timestamp: t.bigint().notNull(),
+    owner: t.hex().notNull(),
+    from: t.hex().notNull(),
+    to: t.hex().notNull(),
+    amount: t.bigint().notNull(),
+  })
+)
 
-or if that doesn't work, this is ok:
+export const ProxyDeployedEvent = onchainTable('ProxyDeployedEvent', (t) => ({
+  id: t.text().primaryKey(),
+  timestamp: t.bigint().notNull(),
+  delegate: t.hex().notNull(),
+  proxyAddress: t.hex().notNull(),
+}))
 
-{
-  account ("0x123") {
-    delegates
-    values
-  }
-}
+export const TransferBatchEvent = onchainTable('TransferBatchEvent', (t) => ({
+  id: t.text().primaryKey(),
+  timestamp: t.bigint().notNull(),
+  operator: t.hex().notNull(),
+  from: t.hex().notNull(),
+  to: t.hex().notNull(),
+  ids: t.bigint().array().notNull(),
+  values: t.bigint().array().notNull(),
+}))
 
-last option is a custom GET endpoint that returns something like this:
-
-[
-  {
-    "delegate": "0x534631bcf33bdb069fb20a93d2fdb9e4d4dd42cf",
-    "tokenId": "475411618940684652382658899876961866559843549903",
-    "amount": "25000000000000000000"
-  },
-  {
-    "delegate": "0xa7860e99e3ce0752d1ac53b974e309fff80277c6",
-    "tokenId": "956391030522194004329440103514838893413546489798",
-    "amount": "10000000000000000000"
-  },
-]
-*/
-
-export const Account = onchainTable('Account',(p: any) => ({
-  id: p.hex().primaryKey(),
-  delegates: p.hex().array(),
-}));
-
-export const DelegationProcessedEvent = onchainTable('DelegationProcessedEvent',(p: any) => ({
-  id: p.text().primaryKey(),
-  from: p.hex(),
-  to: p.hex(),
-  amount: p.bigint(),
-}));
-
-export const  ProxyDeployedEvent = onchainTable('ProxyDeployedEvent',(p: any) => ({
-    id: p.text().primaryKey(),
-    delegate: p.hex(),
-    proxyAddress: p.hex(),
-}));
-
-export const  TransferBatchEvent = onchainTable('TransferBatchEvent',(p: any) => ({
-  id: p.text().primaryKey(),
-  operator: p.hex(),
-  from: p.hex(),
-  to: p.hex(),
-  ids: p.bigint().array(),
-  values: p.bigint().array(),
-}));
+export const TransferEvent = onchainTable('TransferEvent', (t) => ({
+  key: t.text().primaryKey(),
+  timestamp: t.bigint().notNull(),
+  operator: t.hex().notNull(),
+  from: t.hex().notNull(),
+  to: t.hex().notNull(),
+  id: t.bigint().notNull(),
+  value: t.bigint().notNull(),
+}))
