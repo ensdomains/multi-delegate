@@ -1,29 +1,37 @@
-import { graphql } from '@ponder/core'
-import { cors } from 'hono/cors'
+import { Hono } from 'hono'
+import { eq, graphql } from 'ponder'
+import { db, publicClients } from 'ponder:api'
+import schema, { Account, DelegationProcessedEvent } from 'ponder:schema'
 import { erc20MultiDelegateContract } from 'shared/contracts'
-import { createPublicClient, isAddress } from 'viem'
+import { isAddress } from 'viem'
 
-import { ponder } from '@/generated'
+const app = new Hono()
 
-import ponderConfig from '../../ponder.config'
+app.use('/', graphql({ db, schema }))
 
-ponder.use('*', cors())
-
-ponder.use('/', graphql())
-
-ponder.get('/:address', async (c) => {
-  const { address } = c.req.param()
-  const { Account } = c.get('db')
-  const client = createPublicClient(ponderConfig.networks.mainnet)
+app.get('/:address', async (ctx) => {
+  const { address } = ctx.req.param()
 
   if (!isAddress(address)) {
-    return c.json({ error: 'Invalid address' })
+    return ctx.json({ error: 'Invalid address' })
   }
 
-  const delegates = (await Account.findUnique({ id: address }))?.delegates || []
-  const tokenIds = delegates.map((item) => BigInt(item))
+  const result = await db
+    .select()
+    .from(Account)
+    .where(eq(Account.id, address))
+    .limit(1)
 
-  const balanceOf = await client.readContract({
+  if (result.length === 0 || result[0]?.delegates?.length == null) {
+    return ctx.json([])
+  }
+
+  const { delegates } = result[0]
+  const tokenIds = delegates.map((item: string | number | bigint | boolean) =>
+    BigInt(item)
+  )
+
+  const balanceOf = await publicClients.mainnet.readContract({
     ...erc20MultiDelegateContract,
     functionName: 'balanceOfBatch',
     args: [new Array(tokenIds.length).fill(address), tokenIds],
@@ -36,7 +44,7 @@ ponder.get('/:address', async (c) => {
   }))
 
   // remove delegates with no balance
-  return c.json(
+  return ctx.json(
     data
       .filter((item) => item.amount !== '0')
       .map((item) => ({
@@ -45,3 +53,5 @@ ponder.get('/:address', async (c) => {
       }))
   )
 })
+
+export default app

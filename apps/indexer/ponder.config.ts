@@ -1,18 +1,18 @@
-import { createConfig } from '@ponder/core'
+import { createConfig } from 'ponder'
 import { erc20MultiDelegateContract } from 'shared/contracts'
 import { http } from 'viem'
 
 export default createConfig({
-  networks: {
+  chains: {
     mainnet: {
-      chainId: 1,
-      transport: http(process.env.PONDER_RPC_URL_1),
+      id: 1,
+      rpc: process.env.PONDER_RPC_URL_1,
     },
   },
   contracts: {
     MultiDelegate: {
       ...erc20MultiDelegateContract,
-      network: 'mainnet',
+      chain: 'mainnet',
       startBlock: erc20MultiDelegateContract.deployedBock,
     },
   },
