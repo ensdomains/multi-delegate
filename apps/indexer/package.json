@@ -11,10 +11,10 @@
     "typecheck": "tsc"
   },
   "dependencies": {
-    "hono": "^4.9.4",
-    "ponder": "^0.12.16",
+    "hono": "4.12.18",
+    "ponder": "0.16.6",
     "shared": "workspace:*",
-    "viem": "^2.8.2"
+    "viem": "2.48.11"
   },
   "devDependencies": {
     "@types/node": "^20.9.0",
