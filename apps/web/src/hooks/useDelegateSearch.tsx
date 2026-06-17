@@ -1,8 +1,11 @@
 import { useQuery } from '@tanstack/react-query'
+import { Address, isAddress } from 'viem'
 
 import { GRAPH_URL } from '../lib/env'
 
-type SearchResult = { name: string }
+type SearchResult =
+  | { name: string; address?: undefined }
+  | { name?: undefined; address: Address }
 
 export function useDelegateSearch(searchQuery: string) {
   return useQuery<SearchResult[]>({
@@ -15,6 +18,11 @@ export function useDelegateSearch(searchQuery: string) {
       // If the user types in a name directly, we can skip the subgraph query
       if (searchQuery.endsWith('.eth')) {
         return [{ name: searchQuery }]
+      }
+
+      // If the user types in an address directly, we can skip the subgraph query
+      if (isAddress(searchQuery)) {
+        return [{ address: searchQuery }]
       }
 
       const res = await fetch(GRAPH_URL, {
